@@ -1,0 +1,411 @@
+acid
+acid uric
+acid uric*
+alat
+alat (gpt)
+alat (gpt)*
+alat gpt
+albumin
+albumin (niệu)
+albumin creatinin
+albumin/creatinin
+asat
+asat (got)
+asat (got)*
+asat got
+billirubin
+blo
+bạch cầu
+cetone
+cholesterol
+cholesterol toàn phần
+cholesterol toàn phần*
+chất đạm
+chỉ số acid uric
+chỉ số alat
+chỉ số albumin
+chỉ số albumin (niệu)
+chỉ số albumin creatin
+chỉ số albumin niệu
+chỉ số albumin/creatinin
+chỉ số asat
+chỉ số billirubin
+chỉ số bạch cầu
+chỉ số cetone
+chỉ số cholesterol
+chỉ số cholesterol toàn phần
+chỉ số creatinin
+chỉ số creatinin (niệu)
+chỉ số erythrocyte sedimentation rate
+chỉ số esr
+chỉ số gamma gt
+chỉ số ggt
+chỉ số glu
+chỉ số glucose*
+chỉ số hba1c
+chỉ số hbsab định lượng
+chỉ số hbsag miễn dịch tự động
+chỉ số hdl
+chỉ số hdl-c
+chỉ số hdl-cholesterol
+chỉ số high density lipoprotein cholesterol
+chỉ số hồng cầu
+chỉ số ket
+chỉ số ketone
+chỉ số ldl
+chỉ số ldl-c
+chỉ số ldl-cholesterol
+chỉ số leukocyes
+chỉ số low density lipoprotein cholesterol
+chỉ số máu lắng
+chỉ số mỡ máu
+chỉ số nit
+chỉ số nitrit
+chỉ số protein
+chỉ số protein creatinin
+chỉ số protein huyết tương
+chỉ số protein/creatinin
+chỉ số sgot
+chỉ số sgpt
+chỉ số sắc tố màu vàng
+chỉ số tiểu cầu
+chỉ số triglyceride
+chỉ số trọng lượng riêng
+chỉ số ubg
+chỉ số ure
+chỉ số ure máu
+chỉ số urobilinogen
+chỉ số xeton
+chỉ số đái tháo đường
+chỉ số đường trong nước tiểu
+chỉ số đạm
+creatin
+creatinin
+creatinin (niệu)
+creatinin*
+erythrocyte
+erythrocyte sedimentation rate
+esr
+gamma gt
+ggt
+ggt*
+glu
+glucose
+glucose*
+hba1c
+hbsab định lượng
+hbsag miễn dịch tự động
+hdl
+hdl-c
+hdl-cholesterol
+high density lipoprotein cholesterol
+hồng cầu
+hợp chất do vi khuẩn tạo ra
+ket
+ketone
+ldl
+ldl-c
+ldl-cholesterol
+leu
+leucocyte
+leukocyes
+low density lipoprotein cholesterol
+máu lắng
+mỡ máu
+nit
+nitrit
+nitrite
+ph
+plt
+protein
+protein creatinin
+protein huyết tương
+protein/creatinin
+rbc
+sg
+sgot
+sgpt
+specific gravity
+sô lượng bạch cầu-wbc
+sô lượng bạch cầu-wbc*
+sô lượng hồng cầu-rbc
+sô lượng tiểu cầu-plt
+sắc tố màu vàng
+số bạch cầu
+số hồng cầu
+số lượng bạch cầu
+số lượng hồng cầu
+số lượng hồng cầu-rbc*
+số lượng tiểu cầu
+số lượng tiểu cầu-plt*
+số tiểu cầu
+tiểu cầu
+triglyceride
+triglyceride*
+trọng lượng riêng
+tế bào bạch cầu
+ubg
+ure
+ure*
+urobilinogen
+wbc
+xeton
+đường
+đường trong nước tiểu
+đạm
+độ acid
+HbA1c
+Số lượng hồng cầu -RBC*
+Lượng huyết sắc tố - HGB*
+Thể tích khối hồng cầu - HCT*
+Thể tích trung bình hồng cầu - MCV*
+Lượng HGB trung bình hồng cầu - MCH*
+Nồng độ HGB trung bình hồng cầu - MCHC*
+Phân bố kích thước hồng cầu-RDW-CV*
+Phân bố kích thước hồng cầu-RDW-SD*
+Số lượng bạch cầu -WBC*
+Số lượng bạch cầu trung tính-NE#
+Số lượng bạch cầu lympho-LY#
+Số lượng bạch cầu mono-MO#
+Số lượng bạch cầu ưu axit-EO#
+Số lượng bạch cầu ưu ba-zơ BA#
+Số lượng tiểu cầu-PLT*
+Thể tích trung bình tiểu cầu-MPV*
+Độ phân bố tiểu cầu-PDW*
+Số lưọng hồng cầu có nhân NRBC
+Số lượng hồng cầu lưới
+Số lượng bạch cầu lớn không bắt màu  LUC#
+Tỷ lệ bạch cầu lớn không bắt màu  LUC%
+P-LCR (Tỷ lệ tiểu cầu có kích thước lớn)
+PCR (Tỷ lệ khối tiểu cầu)
+Ure*
+Creatimin*
+Glucose*
+Acid uric*
+ASAT (GOT)*
+ASAT (GPT)*
+GGT*
+Cholesterol toàn phần*
+Triglyceride
+HDL-C
+LDL-C
+Peroxydase
+Sudan đen
+Esterase không đặc hiệu không ức chế
+Esterase không đặc hiệu  ức chế
+Esterase đặc hiệu
+P.A.S
+Phosphatase kiềm bạch cầu (L.A.P)
+Hồng cầu nhiễm sắt (Sideroblast)
+Bilirubin TP
+Bilirubin TT
+Bilirubin GT
+Albumin
+Globulin
+Tỷ lệ A/G
+Fibrinogen
+HDL- cho
+LDL- cho
+Na+
+K+
+Cl-
+Calci
+Calci ion hoá
+Phospho TE
+Phospho NL
+Sắt
+Magiê
+Amylase
+CK
+CK-MB
+LDH
+Cholinesterase
+Thời gian Prothrombin (PT)
+Tỷ lệ Prothrombin (PT)
+INR
+Thời gian thromboplastin hoạt hoá từng phần (APTT)
+Tỷ lệ APTT bênh/chứng
+Tỷ lệ TT bệnh/chứng
+Thời gian thrombin
+Định lượng ProBNP (NTproBNP)
+Leucocyte
+Protein
+Specific gravity
+Glucose
+Nitrite
+pH
+Cetone
+Urobilinogen
+Erythrocyte
+Bilirubin
+Albumin (niệu)
+Creatinin (niệu)
+Protein/Creatinin
+Albumin/Creatinin
+Bạch Cầu
+Hồng Cầu
+Dưỡng chấp
+Porphyrin
+Protein Bence- Jones
+Acid uric
+Amylase
+Na+
+K+
+HbsAG miễn dịch tự động*
+HBsAb định lượng
+Hồng cầu trong phân test nhanh
+Số lượng hồng cầu
+Số lượng tế bào có nhân
+Bạch cầu đoạn trung tính
+Bạch cầu lympho
+Bạch cầu mono
+Các tế bào khác
+Protein
+Glucose
+Clorua
+Phản ứng Pandy
+HCl tự do
+HCl toàn phần
+Phản ứng Rivalta
+pH động mạch
+pCO2
+pO2 động mạch
+HCO3  chuẩn
+Kiềm dư
+Huyết sắc tố
+Stecobilin
+Stecobilinogen
+Máu toàn phần trong phân
+Penicilline
+Ampicilline
+Amo+A.clavulanic
+Aztreonam
+Mezlocilline
+Oxacilline/ phế
+Oxacilline/ tụ
+Cephalotine
+Cefuroxime
+Ceftazidime
+Cefotaxime
+Ceftriaxone
+Cefoperazone
+Cefepime
+Vancomycin
+Clindamycin
+Chloramphenicol
+Erythromycine
+Tetracycline
+Doxycycline
+Nalidixic acid
+Nofloxacine
+Ciprofloxacine
+Ofloxacine
+Gentamycine
+Tobramycine
+Amikacine
+Netromycine
+Co-trimoxazol
+Nitroxoline
+Hb A1
+Hb A2
+Hb E
+Hb F
+Hb H
+Hb Bar
+Hb Khác
+bạch cầu (wbc)
+ferritin
+ferritin (cobas)
+hb a1
+hb a2
+hb e
+hb f
+hb h
+hba1
+hba2
+hbe
+hbf
+hbh
+hct
+hct (hematocrite)
+hct (thể tích khối hồng cầu)
+hct(thể tích khối hồng cầu)
+hematocrit
+hgb
+hgb (hemoglobin)
+hgb (huyết sắc tố)
+hgb (lượng huyết sắc tố)
+hgb(lượng huyết sắc tố)
+huyết sắc tố (hgb)
+hồng cầu (rbc)
+khối hồng cầu (hct)
+lượng hb trung bình hc (mch)
+lượng hb trung bình hc( mch)
+lượng hb trung bình hồng cầu (mch)
+lượng hgb trung bình hồng cầu-mch*
+lượng hst trung bình hồng cầu (mch)
+lượng huyết sắc tố
+lượng huyết sắc tố (hb)
+lượng huyết sắc tố trung bình hồng cầu (mch)
+lượng huyết sắc tố-hgb*
+mch
+mch (lượng hst tb hc)
+mch (lượng hst tb hồng cầu)
+mch (lượng hst trung bình hồng cầu)
+mchc
+mchc (nồng độ hst tb hc)
+mchc (nồng độ hst tb hồng cầu)
+mchc (nồng độ hst trung bình hồng cầu)
+mcv
+mcv (thể tích tb hc)
+mcv (thể tích trung bình hồng cầu)
+nồng độ hb trung bình hc (mchc)
+nồng độ hb trung bình hồng cầu ( mchc)
+nồng độ hgb trung bình hồng cầu-mchc*
+nồng độ hst trung bình hồng cầu (mchc)
+nồng độ huyết sắc tố trung bình hồng cầu (mchc)
+phân bố kích thước hồng cầu-rdw-cv*
+plt
+plt (số lượng tiểu cầu)
+plt (tiểu cầu)
+rbc
+rbc ( số lượng hồng cầu)
+rbc (hồng cầu)
+rbc (số lượng hồng cầu)
+rdw (dải phân bố kt hc)
+rdw (dải phân bố kích thước hồng cầu)
+rdw (dải phân bố kích thướng hồng cầu)
+rdw-cv
+sắt ht
+sắt huyết thanh
+số lượng bạch cầ
+số lượng bạch cầu
+số lượng bạch cầu (wbc)
+số lượng bạch cầu(*)
+số lượng bạch cầu-wbc*
+số lượng huyết sắc tố (hb)
+số lượng hồng cầu
+số lượng hồng cầu (rbc)
+số lượng hồng cầu(*)
+số lượng hồng cầu-rbc*
+số lượng tiểu cầu
+số lượng tiểu cầu (plt)
+số lượng tiểu cầu(*)
+số lượng tiểu cầu-plt*
+thể tích khối hồng cầu (hct)
+thể tích khối hồng cầu-hct*
+thể tích trung bình hc (mcv)
+thể tích trung bình hồng cầu (mcv)
+thể tích trung bình hồng cầu-mcv*
+tiểu cầu (plt)
+wbc
+wbc ( bạch cầu)
+wbc (bạch cầu)
+wbc (số lượng bạch cầu
+wbc (số lượng bạch cầu)
+định lượng sắt huyết thanh
+độ phân bố hc (rdw-cv)
+độ phân bố hồng cầu (rdw-cv)
+độ phân bố kích thước hồng cầu (rdw)
+độ phân tán của đường kính hồng cầu (rdwc)
+độ phân tán hc (rdw-cv)

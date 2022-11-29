@@ -1,0 +1,9 @@
+completions.dict: lists all the distinct tokens in the completions sorted in lexicographical order.
+
+completions.mapped: lists all completions whose tokens have been mapped to integer ids as assigned by a lexicographically-sorted string dictionary (that should be built from the tokens listed in completions.dict). Each completion terminates with the id 0.
+
+completions.mapped.stats contains some statistics about the datasets, needed to build the data structures more efficiently. # num terms (len vocabulary), max_len_completion, num docs
+
+completions.inverted is the inverted file.
+
+completions.forward is the forward file. Note that each list is not sorted, thus the lists are the same as the ones contained in completions.mapped but sorted in docID order.

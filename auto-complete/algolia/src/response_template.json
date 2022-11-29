@@ -1,0 +1,149 @@
+{
+    "hits": [
+        {
+            "name": "đau đầu",
+            "objectID": "75609f47f3993_dashboard_generated_id",
+            "_highlightResult": {
+                "name": {
+                    "value": "<em>đau</em> <em>đầu</em>",
+                    "matchLevel": "full",
+                    "fullyHighlighted": true,
+                    "matchedWords": [
+                        "đau",
+                        "đ"
+                    ]
+                }
+            }
+        },
+        {
+            "name": "đau đớn",
+            "objectID": "19c4964cca0dd2_dashboard_generated_id",
+            "_highlightResult": {
+                "name": {
+                    "value": "<em>đau</em> <em>đ</em>ớn",
+                    "matchLevel": "full",
+                    "fullyHighlighted": false,
+                    "matchedWords": [
+                        "đau",
+                        "đ"
+                    ]
+                }
+            }
+        },
+        {
+            "name": "gây đau đớn",
+            "objectID": "24d4a51830380_dashboard_generated_id",
+            "_highlightResult": {
+                "name": {
+                    "value": "gây <em>đau</em> <em>đ</em>ớn",
+                    "matchLevel": "full",
+                    "fullyHighlighted": false,
+                    "matchedWords": [
+                        "đau",
+                        "đ"
+                    ]
+                }
+            }
+        },
+        {
+            "name": "giảm đau đớn",
+            "objectID": "1622aa3a542d91_dashboard_generated_id",
+            "_highlightResult": {
+                "name": {
+                    "value": "giảm <em>đau</em> <em>đ</em>ớn",
+                    "matchLevel": "full",
+                    "fullyHighlighted": false,
+                    "matchedWords": [
+                        "đau",
+                        "đ"
+                    ]
+                }
+            }
+        },
+        {
+            "name": "đau khắp đầu",
+            "objectID": "dd7f54b6dea4b_dashboard_generated_id",
+            "_highlightResult": {
+                "name": {
+                    "value": "<em>đau</em> khắp <em>đầu</em>",
+                    "matchLevel": "full",
+                    "fullyHighlighted": false,
+                    "matchedWords": [
+                        "đau",
+                        "đ"
+                    ]
+                }
+            }
+        },
+        {
+            "name": "đau căng đầu",
+            "objectID": "1f7374c50c1fc9_dashboard_generated_id",
+            "_highlightResult": {
+                "name": {
+                    "value": "<em>đau</em> căng <em>đầu</em>",
+                    "matchLevel": "full",
+                    "fullyHighlighted": false,
+                    "matchedWords": [
+                        "đau",
+                        "đ"
+                    ]
+                }
+            }
+        },
+        {
+            "name": "đau vùng đùi",
+            "objectID": "1b61dc5afc5e2e_dashboard_generated_id",
+            "_highlightResult": {
+                "name": {
+                    "value": "<em>đau</em> vùng <em>đ</em>ùi",
+                    "matchLevel": "full",
+                    "fullyHighlighted": false,
+                    "matchedWords": [
+                        "đau",
+                        "đ"
+                    ]
+                }
+            }
+        },
+        {
+            "name": "đi tiểu đau",
+            "objectID": "8d4426fc6d282_dashboard_generated_id",
+            "_highlightResult": {
+                "name": {
+                    "value": "<em>đ</em>i tiểu <em>đau</em>",
+                    "matchLevel": "full",
+                    "fullyHighlighted": false,
+                    "matchedWords": [
+                        "đau",
+                        "đ"
+                    ]
+                }
+            }
+        },
+        {
+            "name": "đại tiện đau",
+            "objectID": "f59c4e7f5ce99_dashboard_generated_id",
+            "_highlightResult": {
+                "name": {
+                    "value": "<em>đ</em>ại tiện <em>đau</em>",
+                    "matchLevel": "full",
+                    "fullyHighlighted": false,
+                    "matchedWords": [
+                        "đau",
+                        "đ"
+                    ]
+                }
+            }
+        }
+    ],
+    "nbHits": 9,
+    "page": 0,
+    "nbPages": 1,
+    "hitsPerPage": 20,
+    "exhaustiveNbHits": true,
+    "exhaustiveTypo": true,
+    "query": "đau đ",
+    "params": "query=%C4%91au+%C4%91",
+    "renderingContent": {},
+    "processingTimeMS": 1
+}

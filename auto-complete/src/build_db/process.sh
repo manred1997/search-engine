@@ -1,0 +1,5 @@
+python extract_dict.py
+python map_dataset.py
+python build_stats.py
+python build_inverted_and_forward.py
+python partition_queries_by_length.py
