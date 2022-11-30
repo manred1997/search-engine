@@ -7,3 +7,7 @@ The feature works in a very simple way: it detects what a customer is typing, an
 In reality, it’s a bit more complicated because they also take into consideration the popularity of different products and keywords when ranking suggestions.
 
 **For example**: In an online store selling clothes, if you type in “sh”, it might suggest shoes or shirts. If the store is selling bathroom appliances, it might suggest shower curtains or shelves.
+
+<p align="center">
+  <img src="./assert/auto-complete.png" />
+</p>
