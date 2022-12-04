@@ -6,15 +6,7 @@ import random
 import numpy as np
 import torch
 
-# Using regex to extract pattern
-import re
-
-import itertools
-
-from config.config import (
-    SIGNAL_SPECIFIC_PATTERN,
-    ENTITY_PATTERNS
-)
+import unicodedata
 
 logger = logging.getLogger(__name__)
 
@@ -71,3 +63,10 @@ def _write_text_file(filename, data):
         for item in data:
             f.write("%s\n" % item)
     logger.info("Writing done")
+
+
+def normalize_string(string):
+    string = unicodedata.normalize('NFKC', string).encode('ascii', 'ignore').decode('ascii')
+    string = string.lower()
+    string = ' '.join(string.split())
+    return string

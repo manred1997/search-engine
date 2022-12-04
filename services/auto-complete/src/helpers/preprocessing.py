@@ -1,6 +1,4 @@
-import regex as re
-
-
+import re
 
 class PreProcess:
     def __init__(self):
