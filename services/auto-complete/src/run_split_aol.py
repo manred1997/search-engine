@@ -1,6 +1,6 @@
 import argparse
 
-from preprocessing.AOL import process
+from helpers.AOL import process
 from utils.utils import init_logger
 
 def main(args):

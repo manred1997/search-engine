@@ -146,5 +146,6 @@ twistd.pid
 data/
 api/
 resources/
+services/auto-complete/processed-data/
 # Ignore dynaconf secret files
 .secrets.*
