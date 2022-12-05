@@ -7,26 +7,46 @@ import os
 import logging
 from tqdm import tqdm
 
-from utils.utils import normalize_string
+from utils.normalize import (
+    normalize_diacritic,
+    normalize_encode
+)
 
 logger = logging.getLogger(__name__)
 
-def process(args,
-            splits = ['train', 'valid', 'test'],
+def process(train_start = '2006-03-01 00:00:00',
+            train_end = '2006-05-18 00:00:00',
+            test_start = '2006-05-25 00:00:00',
+            test_end = '2006-06-01 00:00:00',
+            dev_start = '2006-05-18 00:00:00',
+            dev_end = '2006-05-25 00:00:00',
+            splits = ['train', 'test', 'dev'],
             columns = ['uid', 'query', 'time'],
-            fmt = '%Y-%m-%d %H:%M:%S'):
+            fmt = '%Y-%m-%d %H:%M:%S',
+            source_dir = './aol_benchmark_dir',
+            target_dir = './data') -> None:
     
-    itv = {s: tuple(vars(args)[f"{s}_{i}"] for i in ['start', 'end']) for s in splits}
+
+    itv = {}
+    if 'train' in splits and train_start and train_end:
+        itv['train'] = tuple((train_start, train_end))
+    
+    if 'test' in splits and test_start and test_end:
+        itv['test'] = tuple((test_start, test_end))
+    
+    if 'dev' in splits and dev_start and dev_end:
+        itv['dev'] = tuple((dev_start, dev_end))
+    
     for s in splits:
         logger.info(f"  {s:5s} data: from {itv[s][0]} until {itv[s][1]}")
 
+    # normalize time
     itv = {k: tuple(datetime.datetime.strptime(x, fmt) for x in v) for k, v in itv.items()}
 
-    valid = (itv['train'][0] < itv['train'][1] <= itv['valid'][0] < itv['valid'][1] <= itv['test'][0] < itv['test'][1])
+    valid = (itv['train'][0] < itv['train'][1] <= itv['dev'][0] < itv['dev'][1] <= itv['test'][0] < itv['test'][1])
     assert valid, "Invalid time intervals"
 
     # make directory and open files to write
-    target_dir = args.target_dir
     os.makedirs(target_dir, exist_ok=True)
     f = {s: {column: open(os.path.join(target_dir, f"{s}.{column}.txt"), 'w') for column in columns} for s in splits}
 
@@ -35,13 +55,14 @@ def process(args,
     for i in range(1, 11):
         filename = f"user-ct-test-collection-{i:02d}.txt"
         logger.info(f"Reading {filename}...")
-        f_org = open(os.path.join(args.aol_benchmark_dir, filename))
+        f_org = open(os.path.join(source_dir, filename))
         f_org.readline() # Skip first row
         prev = {column: '' for column in columns}
         for line in tqdm(f_org):
             data = {column: v for column, v in zip(columns, line.strip().split('\t')[:3])}
             # normalize queries
-            data['query'] = normalize_string(data['query'])
+            data['query'] = normalize_encode(data['query'])
+            data['query'] = normalize_diacritic(data['query'])
             # filter out too short queries and redundant queries
             # data['query'] == '-'
             if len(data['query']) < 3 or (data['uid'], data['query']) == (prev['uid'], prev['query']):
