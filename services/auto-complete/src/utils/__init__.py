@@ -17,3 +17,7 @@ from utils.normalize import (
     normalize_diacritic,
     normalize_encode
 )
+
+from utils.augment import (
+    remove_accent
+)

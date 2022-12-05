@@ -6,8 +6,6 @@ import random
 import numpy as np
 import torch
 
-import re
-
 logger = logging.getLogger(__name__)
 
 
