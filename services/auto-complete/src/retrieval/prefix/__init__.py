@@ -1,1 +1,1 @@
-from prefix.trie import Trie
+from src.retrieval.prefix.trie import Trie

@@ -1,3 +1,7 @@
+import os
+import sys
+import logging
+
 from sanic import Sanic
 from sanic.response import (
     json,
@@ -6,9 +10,8 @@ from sanic.response import (
 
 from config import settings
 
-from utils.utils import _read_text_file
-
-from prefix.trie import Trie
+from src.utils.utils import _read_text_file
+from src.retrieval.prefix.trie import Trie
 
 query_logs = _read_text_file(settings.default.retrieval.prefix.FOLDER_QUERY_LOGS)
 

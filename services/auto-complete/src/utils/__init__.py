@@ -1,4 +1,4 @@
-from utils.utils import (
+from src.utils.utils import (
     init_logger,
     set_seed,
     _read_json_file,
@@ -8,16 +8,16 @@ from utils.utils import (
     is_valid_vietnam_word
 )
 
-from utils.utils import (
+from src.utils.utils import (
     vowel,
     vowel_to_idx
 )
 
-from utils.normalize import (
+from src.utils.normalize import (
     normalize_diacritic,
     normalize_encode
 )
 
-from utils.augment import (
+from src.utils.augment import (
     remove_accent
 )

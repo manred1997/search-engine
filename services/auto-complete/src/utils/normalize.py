@@ -1,10 +1,10 @@
 import regex as re
 
-from utils.utils import (
+from src.utils.utils import (
     is_valid_vietnam_word
 )
 
-from utils.utils import (
+from src.utils.utils import (
     vowel,
     vowel_to_idx
 )

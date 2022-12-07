@@ -1,7 +1,13 @@
 import argparse
+import sys
+import os
 
-from helpers.AOL import process
-from utils.utils import init_logger
+sys.path.append(os.getcwd())
+
+from src.helpers.AOL import process
+from src.utils.utils import init_logger
+
+
 
 def main(args):
     init_logger()

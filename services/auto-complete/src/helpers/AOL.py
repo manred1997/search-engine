@@ -7,7 +7,7 @@ import os
 import logging
 from tqdm import tqdm
 
-from utils.normalize import (
+from src.utils.normalize import (
     normalize_diacritic,
     normalize_encode
 )
