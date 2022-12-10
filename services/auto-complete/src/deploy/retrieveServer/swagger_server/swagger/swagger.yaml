@@ -1,0 +1,74 @@
+openapi: 3.0.3
+info:
+  title: Swagger Auto-Completion - OpenAPI 3.0
+  description: 'This is a sample Auto-Completion Server based on the OpenAPI 3.0 specification. '
+  contact:
+    email: tranhoangvu1997.thv@gmail.com
+  version: 1.0.11
+externalDocs:
+  description: Find out more about Swagger
+  url: http://swagger.io
+servers:
+- url: https://development.gigantic-server.com/v1
+  description: Development server
+- url: https://staging.gigantic-server.com/v1
+  description: Staging server
+- url: https://api.gigantic-server.com/v1
+  description: Production server
+tags:
+- name: auto-complete
+  description: auto-complete services
+paths:
+  /healthCheck:
+    get:
+      tags:
+      - auto-complete
+      summary: Health check
+      operationId: health_check
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/healthCheck'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/healthCheck'
+      x-openapi-router-controller: swagger_server.controllers.auto_complete_controller
+  /prefixRetrieve:
+    post:
+      tags:
+      - auto-complete
+      summary: Finds completion candidates
+      description: Retrieve completion candidates by keystrokes of user
+      operationId: find_completions_by_charater
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: string
+        required: true
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/prefixRetrieve'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/prefixRetrieve'
+        "400":
+          description: Invalid syntax
+      x-openapi-router-controller: swagger_server.controllers.auto_complete_controller
+components:
+  schemas:
+    healthCheck:
+      type: string
+      default: Ô tô Kê
+    prefixRetrieve:
+      type: array
+      items:
+        type: string
+
