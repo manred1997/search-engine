@@ -1,4 +1,1 @@
-import sys
-import os
-
-sys.path.append(os.getcwd())
+from src.retrieval.prefixtrie import Trie

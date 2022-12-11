@@ -2,7 +2,9 @@ import argparse
 import sys
 import os
 
-sys.path.append(os.getcwd())
+
+AUTO_COMPLETE_PATH = os.environ.get('AUTO_COMPLETE_PATH')
+sys.path.append(AUTO_COMPLETE_PATH)
 
 from src.helpers.AOL import process
 from src.utils.utils import init_logger

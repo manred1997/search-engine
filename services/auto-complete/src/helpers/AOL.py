@@ -26,6 +26,8 @@ def process(train_start = '2006-03-01 00:00:00',
             source_dir = './aol_benchmark_dir',
             target_dir = './data') -> None:
     
+    # PWD = os.environ.get('PWD')
+    # source_dir = os.path.join(PWD, source_dir)
 
     itv = {}
     if 'train' in splits and train_start and train_end:

@@ -1,9 +1,15 @@
+import os
 
 from dynaconf import Dynaconf
 
+AUTO_COMPLETE_PATH = os.environ.get('AUTO_COMPLETE_PATH')
+
+
 settings = Dynaconf(
     envvar_prefix="DYNACONF",
-    settings_files=['./src/settings/settings.json', './src/settings/.secrets.json'],
+    settings_files=[os.path.join(AUTO_COMPLETE_PATH, 'src/settings/settings.json'),
+                    os.path.join(AUTO_COMPLETE_PATH, 'src/settings/.secrets.json')
+                ],
 )
 
 # `envvar_prefix` = export envvars with `export DYNACONF_FOO=bar`.
