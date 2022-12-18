@@ -11,3 +11,7 @@ In reality, it’s a bit more complicated because they also take into considerat
 <p align="center">
   <img src="./assert/auto-complete.png" />
 </p>
+
+<p align="center">
+  <img src="./assert/qac-framework.png" />
+</p>

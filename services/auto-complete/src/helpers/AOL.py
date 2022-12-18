@@ -12,6 +12,10 @@ from src.utils.normalize import (
     normalize_encode
 )
 
+from src.helpers.synthetic import (
+    prefixSyntheszie
+)
+
 logger = logging.getLogger(__name__)
 
 def process(train_start = '2006-03-01 00:00:00',
@@ -49,11 +53,20 @@ def process(train_start = '2006-03-01 00:00:00',
     assert valid, "Invalid time intervals"
 
     # make directory and open files to write
-    os.makedirs(target_dir, exist_ok=True)
-    f = {s: {column: open(os.path.join(target_dir, f"{s}.{column}.txt"), 'w') for column in columns} for s in splits}
+    for s in splits:
+        if not os.path.exists(os.path.join(target_dir, s)):
+            os.makedirs(os.path.join(target_dir, s))
+
+    f = {s: {column: open(os.path.join(target_dir, f"{s}", f"{column}.txt"), 'w') for column in columns} for s in splits}
+
+    for s in splits:
+        for c in ['prefix', 'pid']:
+            f[s][c] = open(os.path.join(target_dir, f"{s}", f"{c}.txt"), 'w')
 
     # read original AOL query log dataset and write data into files
     cnt = {s: 0 for s in splits}
+    qid = 1
+
     for i in range(1, 11):
         filename = f"user-ct-test-collection-{i:02d}.txt"
         logger.info(f"Reading {filename}...")
@@ -67,7 +80,7 @@ def process(train_start = '2006-03-01 00:00:00',
             data['query'] = normalize_diacritic(data['query'])
             # filter out too short queries and redundant queries
             # data['query'] == '-'
-            if len(data['query']) < 3 or (data['uid'], data['query']) == (prev['uid'], prev['query']):
+            if len(data['query']) < 3 or len(data['query'].split()) < 2 or (data['uid'], data['query']) == (prev['uid'], prev['query']):
                 continue
             t = datetime.datetime.strptime(data['time'], fmt)
             for s in splits:
@@ -75,7 +88,15 @@ def process(train_start = '2006-03-01 00:00:00',
                     cnt[s] += 1
                     for column in columns:
                         f[s][column].write(data[column] + '\n')
+                    
+                    prefixes = prefixSyntheszie(data['query'])
+                    pid = 1
+                    for prefix in prefixes:
+                        f[s]['prefix'].write(prefix + '\n')
+                        f[s]['pid'].write(f"{data['uid']}.{qid}.{pid}" + '\n')
+                        pid += 1
             prev = data
+            qid += 1
 
     for s in splits:
         logger.info(f"Number of {s:5s} data: {cnt[s]:8d}")

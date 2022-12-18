@@ -19,5 +19,6 @@ from src.utils.normalize import (
 )
 
 from src.utils.augment import (
-    remove_accent
+    remove_accent,
+    remove_punctuation
 )

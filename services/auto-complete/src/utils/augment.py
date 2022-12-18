@@ -1,5 +1,4 @@
-
-
+import string
 
 def remove_accent(text):
     """
@@ -58,3 +57,14 @@ def remove_accent(text):
             return_text.append(c)
     
     return "".join(return_text)
+
+
+def remove_punctuation(text):
+    """
+    clean punctuation
+    params:
+        text has punctuation
+    return:
+        text non punctuation
+    """
+    return text.translate(str.maketrans('', '', string.punctuation))
