@@ -27,8 +27,9 @@ logger = logging.getLogger(__name__)
 # Most Popular Completions
 def mpc(
     prefix_queries: list,
-    intent_user: list,
+    pids: list,
     query_logs: list,
+    qids: list,
     topK: int) -> float:
 
     sumRR = 0
@@ -37,10 +38,15 @@ def mpc(
     tf_queries, tfmc_queries = get_frequence_of_query(query_logs)
     sorted_queries = sorted([q[0] for q in tfmc_queries])
 
-    for pr_q, in_u in tqdm(zip(prefix_queries, intent_user)):
+    for pr_q, pid in tqdm(zip(prefix_queries, pids)):
+        qid = pid.split('.')[1]
+        in_u = query_logs[qids.index(qid)]
         if bisect_contains_check(sorted_queries, pr_q):
             # Retrival phase
-            retrive_candidate = bisect_list_slice(sorted_queries, pr_q)
+            try:
+                retrive_candidate = bisect_list_slice(sorted_queries, pr_q)
+            except:
+                continue
             # ReRank phase
             rerank_candidate = []
             for candidate in retrive_candidate:
@@ -65,18 +71,12 @@ def main(args):
     qids = _read_text_file(os.path.join(args.source_dir, args.mode, args.qid))
     assert len(queries) == len(qids)
 
-    intent_user = []
-    for pid in pids:
-        qid = pid.split('.')[1]
-        query = queries[qids.index(qid)]
-        intent_user.append(query)
-
-    assert len(prefix_queries) == len(intent_user)
-
+    # Evaluate
     mpc(
         prefix_queries=prefix_queries,
-        intent_user=intent_user,
+        pids=pids,
         query_logs=queries,
+        qids=qids,
         topK=args.topK
     )
 
