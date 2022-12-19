@@ -60,7 +60,7 @@ def process(train_start = '2006-03-01 00:00:00',
     f = {s: {column: open(os.path.join(target_dir, f"{s}", f"{column}.txt"), 'w') for column in columns} for s in splits}
 
     for s in splits:
-        for c in ['prefix', 'pid']:
+        for c in ['prefix', 'pid', 'qid']:
             f[s][c] = open(os.path.join(target_dir, f"{s}", f"{c}.txt"), 'w')
 
     # read original AOL query log dataset and write data into files
@@ -88,6 +88,7 @@ def process(train_start = '2006-03-01 00:00:00',
                     cnt[s] += 1
                     for column in columns:
                         f[s][column].write(data[column] + '\n')
+                    f[s]['qid'].write(f"{qid}" + '\n')
                     
                     prefixes = prefixSyntheszie(data['query'])
                     pid = 1
