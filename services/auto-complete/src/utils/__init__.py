@@ -22,3 +22,7 @@ from src.utils.augment import (
     remove_accent,
     remove_punctuation
 )
+
+from src.utils.metric import (
+    mean_reciprocal_rank
+)
