@@ -1,5 +1,0 @@
-PAD
-UNK
-ALU
-FLU
-ALL
