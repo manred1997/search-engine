@@ -176,7 +176,7 @@ ACCENT_ERROR={
     "Đ": "Dd"
 }
 
-REGION = {
+REGION_ERROR = {
     "ẻ": "ẽ",
     "Ẻ": "Ẽ",
     "ẽ": "ẻ",
