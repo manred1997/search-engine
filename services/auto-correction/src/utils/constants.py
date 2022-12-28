@@ -1,0 +1,5 @@
+ALPHABET = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
+ALPHABET_LOWERCASE = 'abcdefghijklmnopqrstuvwxyz'
+ALPHABET_UPPERCASE = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+DIGITS = '0123456789'
+PUNCTUATION = '!"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~'

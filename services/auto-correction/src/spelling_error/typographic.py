@@ -396,17 +396,4 @@ FAT_FINGER_ERROR = {
     'Y': 'UHGT',
     'z': 'asx',
     'Z': 'ASX'
-    }
-
-
-
-
-
-def get_possible_word_from_fat_finger(word):
-    #Hidden step
-    possible_words = [word[:-1]+char
-                             for char in FAT_FINGER_ERROR[word[-1]]
-                             if len(word) > 2]
-
-    possible_words.append(word)
-    return possible_words
+}
