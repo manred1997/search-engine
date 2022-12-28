@@ -93,3 +93,8 @@ def is_valid_vietnam_word(word):
                     return False
                 vowel_index = index
     return True
+
+
+def chunks(l, n):
+    for i in range(0, len(l) - n + 1):
+        yield l[i:i+n]
