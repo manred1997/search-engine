@@ -397,3 +397,7 @@ FAT_FINGER_ERROR = {
     'z': 'asx',
     'Z': 'ASX'
 }
+
+ABBREVIATION_ERROR = None
+
+TEENCODE_ERROR = None

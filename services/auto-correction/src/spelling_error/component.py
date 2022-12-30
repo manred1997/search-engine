@@ -1,3 +1,4 @@
+import re
 import random
 
 from src.spelling_error.typographic import (
@@ -33,9 +34,9 @@ def get_possible_word_from_fat_finger_error(word):
     return possible_words
 
 def get_possible_word_from_telex_error(word):
-    """Create all possible words from telex error
+    """Create all possible word from telex error
     :param word
-    :return possible words list from telex error
+    :return possible word list from telex error
     """
     possible_words = ''
     for char in word:
@@ -50,9 +51,9 @@ def get_possible_word_from_telex_error(word):
     return [possible_words]
 
 def get_possible_word_from_vni_error(word):
-    """Create all possible words from vni error
+    """Create all possible word from vni error
     :param word
-    :return possible words list from vni error
+    :return possible word list from vni error
     """
     possible_words = ''
     for char in word:
@@ -68,9 +69,9 @@ def get_possible_word_from_vni_error(word):
 
 
 def get_possible_word_from_edit_error(word):
-    """Create all possible words from edit error
+    """Create all possible word from edit error
     :param word
-    :return possible words list from edit error
+    :return possible word list from edit error
     """
     if len(word) == 1:
          return [word]
@@ -97,3 +98,33 @@ def get_possible_word_from_edit_error(word):
         possible_words = random.choice(get_possible_word_from_fat_finger_error(word)[:-1])
 
     return possible_words
+
+def get_possible_word_from_accent_error(word):
+    """Create all possible word from accent error
+    :param word
+    :return possible word list from accent error
+    """
+    word = re.sub(r'[àáạảãâầấậẩẫăằắặẳẵ]', 'a', word)
+    word = re.sub(r'[ÀÁẠẢÃĂẰẮẶẲẴÂẦẤẬẨẪ]', 'A', word)
+    word = re.sub(r'[èéẹẻẽêềếệểễ]', 'e', word)
+    word = re.sub(r'[ÈÉẸẺẼÊỀẾỆỂỄ]', 'E', word)
+    word = re.sub(r'[òóọỏõôồốộổỗơờớợởỡ]', 'o', word)
+    word = re.sub(r'[ÒÓỌỎÕÔỒỐỘỔỖƠỜỚỢỞỠ]', 'O', word)
+    word = re.sub(r'[ìíịỉĩ]', 'i', word)
+    word = re.sub(r'[ÌÍỊỈĨ]', 'I', word)
+    word = re.sub(r'[ùúụủũưừứựửữ]', 'u', word)
+    word = re.sub(r'[ƯỪỨỰỬỮÙÚỤỦŨ]', 'U', word)
+    word = re.sub(r'[ỳýỵỷỹ]', 'y', word)
+    word = re.sub(r'[ỲÝỴỶỸ]', 'Y', word)
+    word = re.sub(r'[Đ]', 'D', word)
+    word = re.sub(r'[đ]', 'd', word)
+    return [word]
+
+def get_possible_word_from_miss_space_error(pairwords):
+    """Create all possible word from miss space error
+    :param pair words
+    :return possible word list from miss space error
+    """
+
+    pairwords = pairwords.strip().split()
+    return "".join(pairwords)
