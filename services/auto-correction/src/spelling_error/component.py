@@ -128,3 +128,20 @@ def get_possible_word_from_miss_space_error(pairwords):
 
     pairwords = pairwords.strip().split()
     return "".join(pairwords)
+
+
+def get_possible_word_from_split_error(word):
+    """Create all possible word from accent error
+    :param word
+    :return possible word list from accent error
+    """
+    if len(word) < 3:
+        return word
+    
+    list_char = list(word)
+    index_split = random.randint(1, len(list_char)-1)
+
+    word = "".join(list_char[:index_split]) + " " + "".join(list_char[index_split:])
+    return word
+
+# TODO: Hypernation errors, Capitalisation errors (e.g Apple TM -> Apple branch), 

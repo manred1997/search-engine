@@ -6,6 +6,21 @@ import random
 import numpy as np
 import torch
 
+from src.end_to_end.model.roberta_base import E2ESpellCheckRoberta
+from transformers import (
+    AutoTokenizer,
+    RobertaConfig
+)
+
+MODEL_CLASSES = {
+    "scRoberta": (RobertaConfig, E2ESpellCheckRoberta, AutoTokenizer)
+}
+
+MODEL_PATH_MAP = {
+    "scRoberta": "vinai/phobert-base",
+}
+
+
 logger = logging.getLogger(__name__)
 
 
@@ -39,6 +54,9 @@ def set_seed(seed):
     np.random.seed(seed)
     torch.manual_seed(seed)
 
+def load_tokenizer(args):
+    logger.info("Loadding Tokenizer")
+    return MODEL_CLASSES[args.model_type][2].from_pretrained(args.model_name_or_path)
 
 def _read_json_file(filename):
     logger.info("Reading json file from {}".format(filename))
