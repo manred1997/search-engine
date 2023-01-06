@@ -95,8 +95,7 @@ def get_possible_word_from_edit_error(word):
             else:
                 possible_words = [word[:position_error] + word[position_error+1] + word[position_error] + word[position_error+2:]]
     else: # Replace Error/ Fat-Finger Error
-        possible_words = random.choice(get_possible_word_from_fat_finger_error(word)[:-1])
-
+        possible_words = [random.choice(get_possible_word_from_fat_finger_error(word)[:-1])]
     return possible_words
 
 def get_possible_word_from_accent_error(word):

@@ -55,7 +55,7 @@ def set_seed(seed):
     torch.manual_seed(seed)
 
 def load_tokenizer(args):
-    logger.info("Loadding Tokenizer")
+    logger.info(f"Loadding Tokenizer from {args.model_name_or_path}")
     return MODEL_CLASSES[args.model_type][2].from_pretrained(args.model_name_or_path)
 
 def _read_json_file(filename):

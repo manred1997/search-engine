@@ -77,14 +77,26 @@ class Proccesor(object):
             # 1. Input process
             if is_self_supervised_learning:
                 # Add noise to text
-                if random.gauss(0, 1) < 1: # one standart deviation
+                if random.gauss(0, 1) < 2: # one standart deviation
 
                     # sample error: typo/ortho graphic erros:
                     type_spell_error =  random.choices(self.args.type_spell_error, weights=self.args.weigth_spell_error, k=1)[0]
                     if type_spell_error == 'telex':
-                        text = get_possible_word_from_telex_error(text)
+                        text = text.split()
+                        for idx, word in enumerate(text):
+                            if random.gauss(0, 1) < 2:
+                                continue
+                            word = get_possible_word_from_telex_error(word)
+                            text[idx] = random.choice(word)
+                        text = [" ".join(text)]
                     elif type_spell_error == 'vni':
-                        text = get_possible_word_from_vni_error(text)
+                        text = text.split()
+                        for idx, word in enumerate(text):
+                            if random.gauss(0, 1) < 2:
+                                continue
+                            word = get_possible_word_from_vni_error(word)
+                            text[idx] = random.choice(word)
+                        text = [" ".join(text)]
                     elif type_spell_error == 'edit':
                         text = get_possible_word_from_edit_error(text)
                     elif type_spell_error == 'accent':
@@ -101,7 +113,7 @@ class Proccesor(object):
                         text = text.split()
                         index_word_error = random.randint(0, len(text)-1)
                         word_error = get_possible_word_from_split_error(text[index_word_error])
-                        text = text[:index_word_error] + [word_error] + text[index_space_error+1:]
+                        text = text[:index_word_error] + [word_error] + text[index_word_error+1:]
                         text = [" ".join(text)]
                     else:
                         raise Exception(f"For type spell error, Only telex, vni, edit, accent, split space, miss space error is available")
@@ -123,7 +135,7 @@ class Proccesor(object):
             mode: train, dev, test
         """
         data_path = os.path.join(self.args.data_dir, mode)
-        logger.info("LOOKING AT {}".format(data_path))
+        logger.info("Looking at {}".format(data_path))
 
         texts_path = os.path.join(data_path, self.args.texts_file)
 
@@ -155,7 +167,7 @@ class InputFeatures(object):
         self.input_ids = input_ids
         self.attention_mask = attention_mask
         self.token_type_ids = token_type_ids
-        self.split_size = split_sizes
+        self.split_sizes = split_sizes
         self.label_ids = label_ids
 
     def __repr__(self):
@@ -235,10 +247,10 @@ def convert_examples_to_features(
             len(token_type_ids), max_seq_len
         )
 
-        if ex_index < 5:
+        if ex_index < 10:
             logger.info("*** Example ***")
             logger.info("guid: %s" % example.guid)
-            logger.info("sentence: %s" % example.incorrect_text)
+            logger.info("noise sentence: %s" % example.incorrect_text)
             logger.info("tokens: %s" % " ".join([str(x) for x in tokens]))
             logger.info("input_ids: %s" % " ".join([str(x) for x in input_ids]))
             logger.info("attention_mask: %s" % " ".join([str(x) for x in attention_mask]))
@@ -271,8 +283,8 @@ def convert_examples_to_features(
 
         assert len(label_ids) == max_seq_len, "Error with input length {} vs {}".format(len(label_ids), max_seq_len)
 
-        if ex_index < 5:
-            logger.info("sentence: %s" % example.correct_text)
+        if ex_index < 10:
+            logger.info("clean sentence: %s" % example.correct_text)
             logger.info("tokens: %s" % " ".join([str(x) for x in tokens]))
             logger.info("label_ids: %s" % " ".join([str(x) for x in label_ids]))
 
@@ -338,7 +350,7 @@ def load_and_cache_examples(
     all_input_ids = torch.tensor([f.input_ids for f in features], dtype=torch.long)
     all_attention_mask = torch.tensor([f.attention_mask for f in features], dtype=torch.long)
     all_token_type_ids = torch.tensor([f.token_type_ids for f in features], dtype=torch.long)
-    all_split_sizes = torch.tensor([f.split_sizes for f in features], dtype=torch.long)
+    # all_split_sizes = torch.tensor([f.split_sizes for f in features], dtype=torch.long)
 
 
     all_label_ids = torch.tensor([f.label_ids for f in features], dtype=torch.long)
@@ -347,7 +359,7 @@ def load_and_cache_examples(
         all_input_ids,
         all_attention_mask,
         all_token_type_ids,
-        all_split_sizes,
+        # all_split_sizes,
         all_label_ids
     )
     return dataset
