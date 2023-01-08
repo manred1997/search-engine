@@ -116,3 +116,24 @@ def is_valid_vietnam_word(word):
 def chunks(l, n):
     for i in range(0, len(l) - n + 1):
         yield l[i:i+n]
+
+def get_accuracy_word(preds, targets, lengths=None):
+    """
+    given the predicted word idxs, this method computes the accuracy 
+    by matching all values from 0 index to lengths index along each 
+    batch example if have lengths param
+    """
+
+    correct = 0
+    total = 0
+    if lengths is not None:
+        assert len(preds) == len(targets) == len(lengths)
+        for pred, target, l in zip(preds, targets, lengths):
+            correct += (pred[1:l+1] == target[1:l+1]).sum()
+            total += l
+    else:
+        assert len(preds) == len(targets)
+        for pred, target in zip(preds, targets):
+            correct += (pred == target).sum()
+            total += len(pred)
+    return correct, total

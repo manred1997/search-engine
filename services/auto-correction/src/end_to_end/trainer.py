@@ -3,6 +3,7 @@ import logging
 from tqdm.auto import tqdm, trange
 
 import torch
+import torch.nn.functional as F
 from torch.utils.tensorboard import SummaryWriter
 from torch.utils.data import DataLoader, RandomSampler, SequentialSampler
 from transformers import AdamW, get_linear_schedule_with_warmup
@@ -141,7 +142,6 @@ class Trainer(object):
                         print("\nTuning metrics:", self.args.tuning_metric)
                         results = self.evaluate("dev")
                         writer.add_scalar("Loss/validation", results["loss"], _)
-                        writer.add_scalar("Slot F1/validation", results["slot_f1"], _)
                         early_stopping(results[self.args.tuning_metric], self.model, self.args)
                         if early_stopping.early_stop:
                             print("Early stopping")
@@ -163,7 +163,7 @@ class Trainer(object):
 
     def write_evaluation_result(self, out_file, results):
         out_file = self.args.model_dir + "/" + out_file
-        w = open(out_file, "w", encoding="utf-8")
+        w = open(out_file, "a", encoding="utf-8")
         w.write("***** Eval results *****\n")
         for key in sorted(results.keys()):
             to_write = " {key} = {value}".format(key=key, value=str(results[key]))
