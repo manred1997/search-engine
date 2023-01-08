@@ -117,7 +117,7 @@ def chunks(l, n):
     for i in range(0, len(l) - n + 1):
         yield l[i:i+n]
 
-def get_accuracy_word(preds, targets, lengths=None):
+def get_accuracy_tokenied_word(preds, targets, lengths=None):
     """
     given the predicted word idxs, this method computes the accuracy 
     by matching all values from 0 index to lengths index along each 

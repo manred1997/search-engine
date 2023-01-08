@@ -9,6 +9,7 @@ from torch.utils.data import DataLoader, RandomSampler, SequentialSampler
 from transformers import AdamW, get_linear_schedule_with_warmup
 
 from src.utils.utils import MODEL_CLASSES
+from src.utils.utils import get_accuracy_tokenied_word
 from src.end_to_end.early_stopping import EarlyStopping
 
 logger = logging.getLogger(__name__)
@@ -190,6 +191,9 @@ class Trainer(object):
         eval_loss = 0.0
         nb_eval_steps = 0
 
+        eval_correct_tokens = 0.0
+        eval_total_tokens = 0.0
+
         self.model.eval()
 
         for batch in tqdm(eval_dataloader, desc="Evaluating"):
@@ -207,10 +211,26 @@ class Trainer(object):
                 tmp_eval_loss, (logits) = outputs[:2]
 
                 eval_loss += tmp_eval_loss.mean().item()
+                
+                # 
+                preds = F.softmax(logits, dim=-1)
+                preds = torch.argmax(preds, dim=-1)
+                preds = preds.cpu().detach().numpy()
+
+                targets = batch[3].cpu().detach().numpy()
+
+                correct_tokens, total_tokens = get_accuracy_tokenied_word(preds, targets)
+                eval_correct_tokens += correct_tokens
+                eval_total_tokens += total_tokens
+
             nb_eval_steps += 1
 
         eval_loss = eval_loss / nb_eval_steps
-        results = {"loss": eval_loss}
+
+        results = {
+            "loss": eval_loss,
+            "tokens_accuracy": eval_correct_tokens/eval_total_tokens
+        }
 
 
         logger.info("***** Eval results *****")
