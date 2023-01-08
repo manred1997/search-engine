@@ -23,20 +23,20 @@ def main(args):
     dev_dataset = load_and_cache_examples(args, tokenizer, mode="dev")
     test_dataset = load_and_cache_examples(args, tokenizer, mode="test")
 
-    # trainer = Trainer(args, train_dataset, dev_dataset, test_dataset)
+    trainer = Trainer(args, train_dataset, dev_dataset, test_dataset)
 
-    # if args.do_eval:
-    #     trainer.evaluate("dev")
-    #     trainer.evaluate("test")
+    if args.do_eval:
+        trainer.evaluate("dev")
+        trainer.evaluate("test")
 
     
-    # if args.do_train:
-    #     trainer.train()
+    if args.do_train:
+        trainer.train()
 
-    # if args.do_eval:
-    #     trainer.load_model()
-    #     trainer.evaluate("dev")
-    #     trainer.evaluate("test")
+    if args.do_eval:
+        trainer.load_model()
+        trainer.evaluate("dev")
+        trainer.evaluate("test")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -84,6 +84,8 @@ if __name__ == "__main__":
         help="Specifies a target value that is ignored and does not contribute to the input gradient",
     )
     parser.add_argument("--dropout_rate", default=0.1, type=float, help="Dropout for fully-connected layers")
+    parser.add_argument("--freeze_backbone", default=False, type=bool, help="Freeze Transformer layers")
+
 
 
 

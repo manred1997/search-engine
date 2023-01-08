@@ -27,7 +27,6 @@ class Trainer(object):
         # Use cross entropy ignore index as padding label id so that only real label ids contribute to the loss later
         self.pad_token_label_id = args.ignore_index
         self.config_class, self.model_class, _ = MODEL_CLASSES[args.model_type]
-        # self.config = self.config_class.from_pretrained(model_path, finetuning_task=args.task)
 
         if args.pretrained:
             self.config = self.config_class.from_pretrained(args.pretrained_path, finetuning_task=args.token_level)
@@ -116,8 +115,7 @@ class Trainer(object):
                 inputs = {
                     "input_ids": batch[0],
                     "attention_mask": batch[1],
-                    "split_sizes": batch[3],
-                    "targets": batch[4],
+                    "targets": batch[3],
                 }
                 if self.args.model_type != "distilbert":
                     inputs["token_type_ids"] = batch[2]
@@ -200,8 +198,7 @@ class Trainer(object):
                 inputs = {
                     "input_ids": batch[0],
                     "attention_mask": batch[1],
-                    "split_sizes": batch[3],
-                    "targets": batch[4],
+                    "targets": batch[3],
                 }
                 if self.args.model_type != "distilbert":
                     inputs["token_type_ids"] = batch[2]

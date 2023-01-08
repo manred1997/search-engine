@@ -27,7 +27,7 @@ class E2ESpellCheckRoberta(RobertaPreTrainedModel):
         logger.info("Load pretrained/check point model")
         self.roberta = RobertaModel(config)
 
-        self.layer_classifier = LayerClassifier(config.hidden_size, self.args.len_vocab)
+        self.layer_classifier = LayerClassifier(config.hidden_size, self.args.vocab_size)
 
         if self.args.freeze_backbone:
             # Uncomment to freeze BERT layers
@@ -61,14 +61,14 @@ class E2ESpellCheckRoberta(RobertaPreTrainedModel):
             loss_fct = nn.CrossEntropyLoss(reduction='mean', ignore_index=self.args.ignore_index)
             if attention_mask is not None:
                 active_loss = attention_mask.view(-1) == 1
-                active_logits = logits.view(-1, self.args.len_vocab)[active_loss]
+                active_logits = logits.view(-1, self.args.vocab_size)[active_loss]
                 active_labels = targets.view(-1)[active_loss]
 
-                total_loss = loss_fct(active_logits, active_labels)
+                loss = loss_fct(active_logits, active_labels)
 
             else:
-                slot_loss = loss_fct(logits.view(-1, self.args.len_vocab), targets.view(-1))
-            total_loss += slot_loss
+                loss = loss_fct(logits.view(-1, self.args.vocab_size), targets.view(-1))
+            total_loss += loss
 
         outputs = ((logits),) + outputs[2:]  # add hidden states and attention if they are here
 
