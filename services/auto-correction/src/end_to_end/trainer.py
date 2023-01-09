@@ -143,6 +143,7 @@ class Trainer(object):
                         print("\nTuning metrics:", self.args.tuning_metric)
                         results = self.evaluate("dev")
                         writer.add_scalar("Loss/validation", results["loss"], _)
+                        writer.add_scalar("Token accuracy", results["tokens_accuracy"], _)
                         early_stopping(results[self.args.tuning_metric], self.model, self.args)
                         if early_stopping.early_stop:
                             print("Early stopping")
