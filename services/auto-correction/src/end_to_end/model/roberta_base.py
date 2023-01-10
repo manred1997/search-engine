@@ -19,9 +19,9 @@ class LayerClassifier(nn.Module):
         return self.linear(x)
 
 
-class E2ESpellCheckRoberta(RobertaPreTrainedModel):
+class E2ESubWordSpellCheckRoberta(RobertaPreTrainedModel):
     def __init__(self, config, args):
-        super(E2ESpellCheckRoberta, self).__init__(config)
+        super(E2ESubWordSpellCheckRoberta, self).__init__(config)
         self.args = args
 
         logger.info("Load pretrained/check point model")

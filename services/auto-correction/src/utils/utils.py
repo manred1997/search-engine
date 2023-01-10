@@ -6,18 +6,18 @@ import random
 import numpy as np
 import torch
 
-from src.end_to_end.model.roberta_base import E2ESpellCheckRoberta
+from src.end_to_end.model.roberta_base import E2ESubWordSpellCheckRoberta
 from transformers import (
     AutoTokenizer,
     RobertaConfig
 )
 
 MODEL_CLASSES = {
-    "scRoberta": (RobertaConfig, E2ESpellCheckRoberta, AutoTokenizer)
+    "scSubWordRoberta": (RobertaConfig, E2ESubWordSpellCheckRoberta, AutoTokenizer)
 }
 
 MODEL_PATH_MAP = {
-    "scRoberta": "vinai/phobert-base",
+    "scSubWordRoberta": "vinai/phobert-base",
 }
 
 
