@@ -3,6 +3,7 @@ import json
 import logging
 import os
 import random
+from tqdm import tqdm
 
 import torch
 from torch.utils.data import TensorDataset
@@ -13,7 +14,10 @@ from src.spelling_error.component import (
     get_possible_word_from_edit_error,
     get_possible_word_from_accent_error,
     get_possible_word_from_miss_space_error,
-    get_possible_word_from_split_error
+    get_possible_word_from_split_error,
+    get_homophone_letter_error,
+    get_homophone_single_word_error,
+    get_homophone_double_word_error
 )
 
 
@@ -28,12 +32,14 @@ class InputExample(object):
     def __init__(self,
                 guid,
                 incorrect_text,
-                correct_text
+                correct_text,
+                label_error_detection=None
                 ) -> None:
 
         self.guid = guid
         self.incorrect_text = incorrect_text
         self.correct_text = correct_text
+        self.label_error_detection = label_error_detection
 
     def __repr__(self):
         return str(self.to_json_string())
@@ -72,7 +78,7 @@ class Proccesor(object):
         assert len(texts) == len(labels)
 
         examples = []
-        for i, (text, corr_text) in enumerate(zip(texts, labels)):
+        for i, (text, corr_text) in tqdm(enumerate(zip(texts, labels))):
             guid = "%s - %s" % (set_type, i)
             # 1. Input process
             if is_self_supervised_learning:
@@ -80,51 +86,60 @@ class Proccesor(object):
                 if random.gauss(0, 1) < 2: # one standart deviation
 
                     # sample error: typo/ortho graphic erros:
-                    type_spell_error =  random.choices(self.args.type_spell_error, weights=self.args.weigth_spell_error, k=1)[0]
-                    if type_spell_error == 'telex':
-                        text = text.split()
-                        for idx, word in enumerate(text):
-                            if random.gauss(0, 1) < 2:
-                                continue
-                            word = get_possible_word_from_telex_error(word)
-                            text[idx] = random.choice(word)
-                        text = [" ".join(text)]
-                    elif type_spell_error == 'vni':
-                        text = text.split()
-                        for idx, word in enumerate(text):
-                            if random.gauss(0, 1) < 2:
-                                continue
-                            word = get_possible_word_from_vni_error(word)
-                            text[idx] = random.choice(word)
-                        text = [" ".join(text)]
-                    elif type_spell_error == 'edit':
-                        text = get_possible_word_from_edit_error(text)
-                    elif type_spell_error == 'accent':
-                        text = get_possible_word_from_accent_error(text)
-                    elif type_spell_error == 'miss_space':
-                        text = text.split()
-                        if len(text) > 1:
-                            index_space_error = random.randint(1, len(text)-1)
-                            pairwords = " ".join(text[index_space_error-1:index_space_error+1])
-                            word_error = get_possible_word_from_miss_space_error(pairwords)
-                            text = text[:max(0, index_space_error-1)] + [word_error] + text[index_space_error+1:]
-                        text = [" ".join(text)]
-                    elif type_spell_error == 'split_error':
-                        text = text.split()
-                        index_word_error = random.randint(0, len(text)-1)
-                        word_error = get_possible_word_from_split_error(text[index_word_error])
-                        text = text[:index_word_error] + [word_error] + text[index_word_error+1:]
-                        text = [" ".join(text)]
-                    else:
-                        raise Exception(f"For type spell error, Only telex, vni, edit, accent, split space, miss space error is available")
-                    text = random.choice(text)
+                    words = text.split()
+                    label_error_detection = [0] * len(words)
+                    for idx, (word, label) in enumerate(zip(words, label_error_detection)):
+                        if random.gauss(0, 1) > self.args.prop_adding_noise: # Probability for adding noise
+                            
+                            
+                            type_spell_error =  random.choices(self.args.type_spell_error, weights=self.args.weigth_spell_error, k=1)[0]
+                            if type_spell_error == 'telex':
+                                word_noise = random.choice(get_possible_word_from_telex_error(word))
+                            elif type_spell_error == 'vni':
+                                word_noise = random.choice(get_possible_word_from_vni_error(word))
+                            elif type_spell_error == 'edit':
+                                word_noise = random.choice(get_possible_word_from_edit_error(word))
+                            elif type_spell_error == 'accent':
+                                word_noise = random.choice(get_possible_word_from_accent_error(word))
+                            elif type_spell_error == 'homophone_letter':
+                                word_noise = random.choice(get_homophone_letter_error(word))
+                            elif type_spell_error == 'homophone_single_word':
+                                word_noise = random.choice(get_homophone_letter_error(word))
+                            elif type_spell_error == 'homophone_double_word':
+                                pass # todo
+                            else:
+                                raise Exception(f"For type spell error, Only typographic (e.g: telex, vni, edit, ...) and orthographic type is available")
 
-            
+                            if word_noise != word:
+                                words[idx] = word_noise
+                                label_error_detection[idx] = 1
+                        else:
+                            continue
+                    
+                    text = " ".join(words)
+
+                    # elif type_spell_error == 'miss_space':
+                    #     text = text.split()
+                    #     if len(text) > 1:
+                    #         index_space_error = random.randint(1, len(text)-1)
+                    #         pairwords = " ".join(text[index_space_error-1:index_space_error+1])
+                    #         word_error = get_possible_word_from_miss_space_error(pairwords)
+                    #         text = text[:max(0, index_space_error-1)] + [word_error] + text[index_space_error+1:]
+                    #     text = [" ".join(text)]
+                    # elif type_spell_error == 'split_error':
+                    #     text = text.split()
+                    #     index_word_error = random.randint(0, len(text)-1)
+                    #     word_error = get_possible_word_from_split_error(text[index_word_error])
+                    #     text = text[:index_word_error] + [word_error] + text[index_word_error+1:]
+                    #     text = [" ".join(text)]
+                    #                     text = random.choice(text)
+
             examples.append(
                 InputExample(
                     guid=guid,
                     incorrect_text=text,
-                    correct_text=corr_text
+                    correct_text=corr_text,
+                    label_error_detection=label_error_detection
                 )
             )
         return examples
@@ -134,7 +149,7 @@ class Proccesor(object):
         Args:
             mode: train, dev, test
         """
-        data_path = os.path.join(self.args.data_dir, mode)
+        data_path = os.path.join(self.args.data_dir, mode, self.args.token_level)
         logger.info("Looking at {}".format(data_path))
 
         texts_path = os.path.join(data_path, self.args.texts_file)

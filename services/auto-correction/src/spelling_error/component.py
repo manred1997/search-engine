@@ -6,6 +6,12 @@ from src.spelling_error.typographic import (
     VNI_ERROR,
     FAT_FINGER_ERROR
 )
+from src.spelling_error.orthographic import (
+    HOMOPHONE_LETTER_ERROR,
+    HOMOPHONE_SINGLE_WORD_ERROR,
+    HOMOPHONE_DOUBLE_WORD_ERROR
+
+)
 
 from src.utils.constants import (
     ALPHABET,
@@ -21,6 +27,10 @@ def get_possible_word_from_fat_finger_error(word):
     :param word
     :return possible words list from fat-finger error
     """
+
+    if not set(word).intersection(set(ALPHABET)):
+        return [word]
+
     while True:
         position_error = random.randint(0, len(word)-1)
         if word[position_error] in ALPHABET:
@@ -28,8 +38,6 @@ def get_possible_word_from_fat_finger_error(word):
     
     possible_words = [word[:position_error] + char + word[position_error+1:]
                         for char in FAT_FINGER_ERROR[word[position_error]]]
-
-    possible_words.append(word)
     
     return possible_words
 
@@ -76,7 +84,7 @@ def get_possible_word_from_edit_error(word):
     if len(word) == 1:
          return [word]
 
-    type_edit = random.choices(['delete', 'insert', 'permute', 'replace'], weights=(35, 17, 39, 9), k=1)[0]
+    type_edit = random.choices(['delete', 'insert', 'permute', 'replace'], weights=(35, 17, 39, 39), k=1)[0]
 
     position_error = random.randint(0, len(word)-1)
 
@@ -95,7 +103,7 @@ def get_possible_word_from_edit_error(word):
             else:
                 possible_words = [word[:position_error] + word[position_error+1] + word[position_error] + word[position_error+2:]]
     else: # Replace Error/ Fat-Finger Error
-        possible_words = [random.choice(get_possible_word_from_fat_finger_error(word)[:-1])]
+        possible_words = [random.choice(get_possible_word_from_fat_finger_error(word))]
     return possible_words
 
 def get_possible_word_from_accent_error(word):
@@ -142,5 +150,43 @@ def get_possible_word_from_split_error(word):
 
     word = "".join(list_char[:index_split]) + " " + "".join(list_char[index_split:])
     return word
+
+def get_homophone_letter_error(word):
+    """Create all possible word from homophone letter error
+    :param word
+    :return possible word list from homophone letter error
+    """
+
+    if not set(word).intersection(set(HOMOPHONE_LETTER_ERROR.keys())):
+        return [word]
+
+
+    while True:
+        position_error = random.randint(0, len(word)-1)
+        if word[position_error] in HOMOPHONE_LETTER_ERROR:
+            break
+    
+    possible_words = [word[:position_error] + char + word[position_error+1:]
+                        for char in HOMOPHONE_LETTER_ERROR[word[position_error]]]
+    
+    possible_words.append(word)
+    
+    return possible_words
+
+
+def get_homophone_single_word_error(word):
+    """Create all possible word from homophone single word error
+    :param word
+    :return possible word list from homophone single word error
+    """
+    return HOMOPHONE_SINGLE_WORD_ERROR.get(word, [word])
+
+def get_homophone_double_word_error(double_word):
+    """Create all possible word from homophone double word error
+    :param word
+    :return possible word list from homophone double word error
+    """
+    pass
+    return
 
 # TODO: Hypernation errors, Capitalisation errors (e.g Apple TM -> Apple branch), 
