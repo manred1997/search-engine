@@ -46,8 +46,9 @@ if __name__ == "__main__":
     
     ## Config process data
     parser.add_argument("--is_self_supervised_learning", action="store_true", help="Self-supervised learning")
-    parser.add_argument("--type_spell_error", default=['telex', 'vni', 'edit', 'accent', 'miss_space', 'split_error'], type=list, help="Types of spelling error")
-    parser.add_argument("--weigth_spell_error", default=[20, 5, 55, 10, 5, 5], type=list, help="Weighting types of spelling error")
+    parser.add_argument("--type_spell_error", default=['telex', 'vni', 'edit', 'accent', 'homophone_letter', 'homophone_single_word'], type=list, help="Types of spelling error")
+    parser.add_argument("--weigth_spell_error", default=[20, 5, 65, 10, 15, 15], type=list, help="Weighting types of spelling error")
+    parser.add_argument("--prop_adding_noise", default=1, type=int, help="Probability of adding noise")
 
 
     ## Resource path   
