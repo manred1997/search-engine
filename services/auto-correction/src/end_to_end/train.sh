@@ -1,5 +1,5 @@
 export lr="5e-5"
-export s="21031997"
+export s="10012023"
 echo "${lr}"
 export PROJECT_PATH=/Users/manred1997/armed2003/search-engine/services/auto-correction
 export MODEL_DIR=scRoberta

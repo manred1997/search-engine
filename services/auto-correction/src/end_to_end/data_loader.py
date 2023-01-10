@@ -80,17 +80,16 @@ class Proccesor(object):
         examples = []
         for i, (text, corr_text) in tqdm(enumerate(zip(texts, labels))):
             guid = "%s - %s" % (set_type, i)
+            words = text.split()
+            label_error_detection = [0] * len(words)
             # 1. Input process
             if is_self_supervised_learning:
                 # Add noise to text
                 if random.gauss(0, 1) < 2: # one standart deviation
 
                     # sample error: typo/ortho graphic erros:
-                    words = text.split()
-                    label_error_detection = [0] * len(words)
                     for idx, (word, label) in enumerate(zip(words, label_error_detection)):
                         if random.gauss(0, 1) > self.args.prop_adding_noise: # Probability for adding noise
-                            
                             
                             type_spell_error =  random.choices(self.args.type_spell_error, weights=self.args.weigth_spell_error, k=1)[0]
                             if type_spell_error == 'telex':
@@ -116,7 +115,7 @@ class Proccesor(object):
                         else:
                             continue
                     
-                    text = " ".join(words)
+            text = " ".join(words)
 
                     # elif type_spell_error == 'miss_space':
                     #     text = text.split()
