@@ -27,7 +27,7 @@ def main(args):
 
     if args.do_eval:
         trainer.evaluate("dev")
-        trainer.evaluate("test")
+        # trainer.evaluate("test")
 
     
     if args.do_train:

@@ -152,8 +152,8 @@ class Trainer(object):
                     if self.args.logging_steps > 0 and global_step % self.args.logging_steps == 0:
                         print("\nTuning metrics:", self.args.tuning_metric)
                         results = self.evaluate("dev")
-                        writer.add_scalar("Loss/validation", results["loss"], _)
-                        writer.add_scalar("Token accuracy", results["tokens_accuracy"], _)
+                        for metric, value in results.items():
+                            writer.add_scalar(f"{metric}", value, _)
                         early_stopping(results[self.args.tuning_metric], self.model, self.args)
                         if early_stopping.early_stop:
                             print("Early stopping")

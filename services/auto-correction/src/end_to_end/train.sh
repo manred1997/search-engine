@@ -16,7 +16,7 @@ python3 src/end_to_end/main.py --token_level syllable  \
         --save_steps 1000    \
         --logging_steps 1000 \
         --num_train_epochs 50  \
-        --tuning_metric tokens_accuracy    \
+        --tuning_metric subtokens_accuracy    \
         --gpu_id 0  \
         --learning_rate $lr \
         --train_batch_size 16   \
