@@ -176,13 +176,15 @@ class InputFeatures(object):
                 attention_mask,
                 token_type_ids,
                 split_sizes,
-                label_ids
+                label_ids,
+                label_length
                 ) -> None:
         self.input_ids = input_ids
         self.attention_mask = attention_mask
         self.token_type_ids = token_type_ids
         self.split_sizes = split_sizes
         self.label_ids = label_ids
+        self.label_length = label_length
 
     def __repr__(self):
         return str(self.to_json_string())
@@ -284,6 +286,8 @@ def convert_examples_to_features(
         special_tokens_count = 2
         if len(tokens) > max_seq_len - special_tokens_count:
             tokens = tokens[: (max_seq_len - special_tokens_count)]
+        
+        label_length = len(tokens)
 
         # Add [SEP] token
         tokens += [sep_token]
@@ -301,6 +305,7 @@ def convert_examples_to_features(
             logger.info("clean sentence: %s" % example.correct_text)
             logger.info("tokens: %s" % " ".join([str(x) for x in tokens]))
             logger.info("label_ids: %s" % " ".join([str(x) for x in label_ids]))
+            logger.info("no. tokens of label: %s" % str(label_length))
 
         features.append(
             InputFeatures(
@@ -308,7 +313,8 @@ def convert_examples_to_features(
                 attention_mask=attention_mask,
                 token_type_ids=token_type_ids,
                 split_sizes=split_sizes,
-                label_ids=label_ids
+                label_ids=label_ids,
+                label_length=label_length
             )
         )
 
@@ -368,12 +374,14 @@ def load_and_cache_examples(
 
 
     all_label_ids = torch.tensor([f.label_ids for f in features], dtype=torch.long)
+    all_label_length = torch.tensor([f.label_length for f in features], dtype=torch.int)
 
     dataset = TensorDataset(
         all_input_ids,
         all_attention_mask,
         all_token_type_ids,
         # all_split_sizes,
-        all_label_ids
+        all_label_ids,
+        all_label_length
     )
     return dataset
