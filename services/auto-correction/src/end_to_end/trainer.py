@@ -1,6 +1,7 @@
 import os
 import logging
 from tqdm.auto import tqdm, trange
+from typing import Union
 
 import torch
 import torch.nn.functional as F
@@ -9,7 +10,13 @@ from torch.utils.data import DataLoader, RandomSampler, SequentialSampler
 from transformers import AdamW, get_linear_schedule_with_warmup
 
 from src.utils.utils import MODEL_CLASSES
-from src.utils.utils import get_accuracy_tokenied_word
+from src.utils.utils import get_evals_base_on_ids
+from src.utils.metrics import (
+    get_evals,
+    get_total_words,
+    get_word_accuracy,
+    get_word_correction_rate
+)
 from src.end_to_end.early_stopping import EarlyStopping
 
 logger = logging.getLogger(__name__)
@@ -17,11 +24,13 @@ logger = logging.getLogger(__name__)
 class Trainer(object):
     def __init__(self,
                 args,
+                tokenizer=None,
                 train_dataset=None,
                 dev_dataset=None,
                 test_dataset=None):
                 
         self.args = args
+        self.tokenizer = tokenizer
         self.train_dataset = train_dataset
         self.dev_dataset = dev_dataset
         self.test_dataset = test_dataset
@@ -44,6 +53,7 @@ class Trainer(object):
                 config=self.config,
                 args=args
             )
+        print(self.model)
         # GPU or CPU
         torch.cuda.set_device(self.args.gpu_id)
         logger.info('GPU ID :',self.args.gpu_id)
@@ -192,8 +202,8 @@ class Trainer(object):
         eval_loss = 0.0
         nb_eval_steps = 0
 
-        eval_correct_tokens = 0.0
-        eval_total_tokens = 0.0
+        eval_correct_subtokens = 0.0
+        eval_total_subtokens = 0.0
 
         self.model.eval()
 
@@ -219,10 +229,21 @@ class Trainer(object):
                 preds = preds.cpu().detach().numpy()
 
                 targets = batch[3].cpu().detach().numpy()
+                targets_ids_length = batch[4].cpu().detach().numpy()
+                # targets_length = batch[5].cpu().detach().numpy()
 
-                correct_tokens, total_tokens = get_accuracy_tokenied_word(preds, targets)
-                eval_correct_tokens += correct_tokens
-                eval_total_tokens += total_tokens
+                # Get evaluate based on ids
+                correct_tokens, total_tokens = get_evals_base_on_ids(preds, targets, targets_ids_length)
+                eval_correct_subtokens += correct_tokens
+                eval_total_subtokens += total_tokens
+
+                # # Get evaluate based on words
+                # target_sentences = self.decode_ids_to_sentence_batch(targets, targets_ids_length)
+                # pred_sentences = self.decode_ids_to_sentence_batch(preds, targets_ids_length)
+
+
+
+                
 
             nb_eval_steps += 1
 
@@ -230,7 +251,7 @@ class Trainer(object):
 
         results = {
             "loss": eval_loss,
-            "tokens_accuracy": eval_correct_tokens/eval_total_tokens
+            "subtokens_accuracy": eval_correct_subtokens/eval_total_subtokens
         }
 
 
@@ -269,3 +290,15 @@ class Trainer(object):
             logger.info("***** Model Loaded *****")
         except Exception:
             raise Exception("Some model files might be missing...")
+        
+    def decode_ids_to_sentence(self, ids):
+        if type(ids) == list:
+            return self.tokenizer.decode(ids)
+        return self.tokenizer.decode(ids.tolist())
+
+    def decode_ids_to_sentence_batch(self, ids_batch, length_ids_batch):
+        sentences = []
+        for ids, length in zip(ids_batch, length_ids_batch):
+            ids = ids[1: length+1] # Remove [CLS], [SEP], [PAD] ids
+            sentences.append(self.decode_ids_to_sentence(ids))
+        return sentences

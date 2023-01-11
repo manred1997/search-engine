@@ -53,13 +53,13 @@ class E2ESubWordSpellCheckRoberta(RobertaPreTrainedModel):
             loss_fct = nn.CrossEntropyLoss(reduction='mean', ignore_index=self.args.ignore_index)
             if attention_mask is not None:
                 active_loss = attention_mask.view(-1) == 1
-                active_logits = logits.view(-1, self.args.vocab_size)[active_loss]
+                active_logits = logits.view(-1, self.config.vocab_size)[active_loss]
                 active_labels = targets.view(-1)[active_loss]
 
                 loss = loss_fct(active_logits, active_labels)
 
             else:
-                loss = loss_fct(logits.view(-1, self.args.vocab_size), targets.view(-1))
+                loss = loss_fct(logits.view(-1, self.config.vocab_size), targets.view(-1))
             total_loss += loss
 
         outputs = ((logits),) + outputs[2:]  # add hidden states and attention if they are here

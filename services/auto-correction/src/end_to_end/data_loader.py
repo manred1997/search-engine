@@ -6,7 +6,7 @@ import random
 from tqdm import tqdm
 
 import torch
-from torch.utils.data import TensorDataset
+from torch.utils.data import TensorDataset, Dataset
 
 from src.spelling_error.component import (
     get_possible_word_from_telex_error,
@@ -103,7 +103,7 @@ class Proccesor(object):
                             elif type_spell_error == 'homophone_letter':
                                 word_noise = random.choice(get_homophone_letter_error(word))
                             elif type_spell_error == 'homophone_single_word':
-                                word_noise = random.choice(get_homophone_letter_error(word))
+                                word_noise = random.choice(get_homophone_single_word_error(word))
                             elif type_spell_error == 'homophone_double_word':
                                 pass # todo
                             else:
@@ -175,16 +175,24 @@ class InputFeatures(object):
                 input_ids,
                 attention_mask,
                 token_type_ids,
-                split_sizes,
+                input_sentence,
                 label_ids,
-                label_length
+                label_ids_length,
+                label_length,
+                label_sentence
                 ) -> None:
+
+        # Source
         self.input_ids = input_ids
         self.attention_mask = attention_mask
-        self.token_type_ids = token_type_ids
-        self.split_sizes = split_sizes
+        self.token_type_ids = token_type_ids 
+        self.input_sentence = input_sentence
+
+        # Target
         self.label_ids = label_ids
+        self.label_ids_length = label_ids_length
         self.label_length = label_length
+        self.label_sentence = label_sentence
 
     def __repr__(self):
         return str(self.to_json_string())
@@ -220,15 +228,14 @@ def convert_examples_to_features(
             logger.info("Writing example %d of %d" % (ex_index, len(examples)))
 
         text_tokens = example.incorrect_text.split()
+        input_sentence = " ".join(text_tokens)
         # Tokenize word by word
         tokens = []
-        split_sizes = []
         for word in text_tokens:
             word_tokens = tokenizer.tokenize(word)
             if not word_tokens:
                 word_tokens = [unk_token]  # For handling the bad-encoded word
             tokens.extend(word_tokens)
-            split_sizes.append(len(word_tokens))
 
         # Account for [CLS] and [SEP]
         special_tokens_count = 2
@@ -266,14 +273,17 @@ def convert_examples_to_features(
         if ex_index < 10:
             logger.info("*** Example ***")
             logger.info("guid: %s" % example.guid)
-            logger.info("noise sentence: %s" % example.incorrect_text)
+            logger.info("noise sentence: %s" % input_sentence)
             logger.info("tokens: %s" % " ".join([str(x) for x in tokens]))
             logger.info("input_ids: %s" % " ".join([str(x) for x in input_ids]))
             logger.info("attention_mask: %s" % " ".join([str(x) for x in attention_mask]))
             logger.info("token_type_ids: %s" % " ".join([str(x) for x in token_type_ids]))
-            logger.info("split_size: %s" % " ".join([str(x) for x in split_sizes]))
+
+
 
         label_tokens = example.correct_text.split()
+        label_sentence = " ".join(label_tokens)
+        label_length = len(label_tokens)
         # Tokenize word by word
         tokens = []
         for word in label_tokens:
@@ -287,7 +297,7 @@ def convert_examples_to_features(
         if len(tokens) > max_seq_len - special_tokens_count:
             tokens = tokens[: (max_seq_len - special_tokens_count)]
         
-        label_length = len(tokens)
+        label_ids_length = len(tokens)
 
         # Add [SEP] token
         tokens += [sep_token]
@@ -302,9 +312,10 @@ def convert_examples_to_features(
         assert len(label_ids) == max_seq_len, "Error with input length {} vs {}".format(len(label_ids), max_seq_len)
 
         if ex_index < 10:
-            logger.info("clean sentence: %s" % example.correct_text)
+            logger.info("clean sentence: %s" % label_sentence)
             logger.info("tokens: %s" % " ".join([str(x) for x in tokens]))
             logger.info("label_ids: %s" % " ".join([str(x) for x in label_ids]))
+            logger.info("no. sub tokens of label: %s" % str(label_ids_length))
             logger.info("no. tokens of label: %s" % str(label_length))
 
         features.append(
@@ -312,9 +323,11 @@ def convert_examples_to_features(
                 input_ids=input_ids,
                 attention_mask=attention_mask,
                 token_type_ids=token_type_ids,
-                split_sizes=split_sizes,
+                input_sentence=input_sentence,
                 label_ids=label_ids,
-                label_length=label_length
+                label_ids_length=label_ids_length,
+                label_length=label_length,
+                label_sentence=label_sentence
             )
         )
 
@@ -370,18 +383,70 @@ def load_and_cache_examples(
     all_input_ids = torch.tensor([f.input_ids for f in features], dtype=torch.long)
     all_attention_mask = torch.tensor([f.attention_mask for f in features], dtype=torch.long)
     all_token_type_ids = torch.tensor([f.token_type_ids for f in features], dtype=torch.long)
-    # all_split_sizes = torch.tensor([f.split_sizes for f in features], dtype=torch.long)
+    all_input_sentences = [f.input_sentence for f in features]
 
 
     all_label_ids = torch.tensor([f.label_ids for f in features], dtype=torch.long)
+    all_label_ids_length = torch.tensor([f.label_ids_length for f in features], dtype=torch.int)
     all_label_length = torch.tensor([f.label_length for f in features], dtype=torch.int)
+    all_label_sentences = [f.label_sentence for f in features]
 
-    dataset = TensorDataset(
+    # dataset = TensorDataset(
+    #     all_input_ids,
+    #     all_attention_mask,
+    #     all_token_type_ids,
+    #     all_input_sentences,
+    #     all_label_ids,
+    #     all_label_ids_length,
+    #     all_label_length,
+    #     all_label_sentences
+    # )
+    dataset = SpellingCorrectDataset(
         all_input_ids,
         all_attention_mask,
         all_token_type_ids,
-        # all_split_sizes,
+        all_input_sentences,
         all_label_ids,
-        all_label_length
+        all_label_ids_length,
+        all_label_length,
+        all_label_sentences
     )
     return dataset
+
+class SpellingCorrectDataset(Dataset):
+    def __init__(self,
+                all_input_ids,
+                all_attention_mask,
+                all_token_type_ids,
+                all_input_sentences,
+                all_label_ids,
+                all_label_ids_length,
+                all_label_length,
+                all_label_sentences
+                ) -> None:
+        
+            self.all_input_ids = all_input_ids
+            self.all_attention_mask = all_attention_mask
+            self.all_token_type_ids = all_token_type_ids
+            self.all_input_sentences = all_input_sentences
+
+            self.all_label_ids = all_label_ids
+            self.all_label_ids_length = all_label_ids_length
+            self.all_label_length = all_label_length
+            self.all_label_sentences = all_label_sentences
+
+    def __len__(self):
+        return len(self.all_input_ids)
+
+    def __getitem__(self, index):
+        
+        return (
+                self.all_input_ids[index],
+                self.all_attention_mask[index],
+                self.all_token_type_ids[index],
+                self.all_input_sentences[index],
+                self.all_label_ids[index],
+                self.all_label_ids_length[index],
+                self.all_label_length[index],
+                self.all_label_sentences[index]
+        )
