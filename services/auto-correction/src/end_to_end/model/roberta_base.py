@@ -2,23 +2,10 @@ import logging
 
 import torch.nn as nn
 
-from transformers.models.roberta.modeling_roberta import RobertaPreTrainedModel, RobertaModel
+from transformers.models.roberta.modeling_roberta import RobertaPreTrainedModel, RobertaModel, RobertaForMaskedLM, RobertaLMHead
 
 
 logger = logging.getLogger(__name__)
-
-class LayerClassifier(nn.Module):
-    def __init__(self, input_dim, output_dim, drop_rate=0.0) -> None:
-        super().__init__()
-        
-        self.dropout = nn.Dropout(drop_rate)
-        self.linear = nn.Linear(input_dim, output_dim)
-
-    def forward(self, x):
-        x = self.dropout(x)
-        return self.linear(x)
-
-
 class E2ESubWordSpellCheckRoberta(RobertaPreTrainedModel):
     def __init__(self, config, args):
         super(E2ESubWordSpellCheckRoberta, self).__init__(config)
@@ -27,13 +14,18 @@ class E2ESubWordSpellCheckRoberta(RobertaPreTrainedModel):
         logger.info("Load pretrained/check point model")
         self.roberta = RobertaModel(config)
 
-        self.layer_classifier = LayerClassifier(config.hidden_size, self.args.vocab_size)
+        self.lm_head = RobertaLMHead(config)
 
         if self.args.freeze_backbone:
             # Uncomment to freeze BERT layers
             for param in self.roberta.parameters():
                 param.requires_grad = False
+    
+    def get_output_embeddings(self):
+        return self.lm_head.decoder
 
+    def set_output_embeddings(self, new_embeddings):
+        self.lm_head.decoder = new_embeddings
 
     def forward(self,
                 input_ids,
@@ -49,7 +41,7 @@ class E2ESubWordSpellCheckRoberta(RobertaPreTrainedModel):
 
         sequence_output = outputs[0] # B x len_seq x hidden_size
 
-        logits = self.layer_classifier(sequence_output)
+        logits = self.lm_head(sequence_output)
 
         total_loss = 0
 
