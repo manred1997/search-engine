@@ -117,6 +117,16 @@ def chunks(l, n):
     for i in range(0, len(l) - n + 1):
         yield l[i:i+n]
 
+def merge_subtokens(tokens):
+    merged_tokens = []
+    for token in tokens:
+        if token.startswith("@@"):
+            merged_tokens[-1] = merged_tokens[-1] + token[2:]
+        else:
+            merged_tokens.append(token)
+    text = " ".join(merged_tokens)
+    return text
+
 def get_evals_base_on_ids(preds, targets, lengths=None):
     """
     given the predicted word idxs, this method computes the accuracy 

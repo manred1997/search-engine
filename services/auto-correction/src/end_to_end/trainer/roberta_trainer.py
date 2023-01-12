@@ -11,6 +11,7 @@ from transformers import AdamW, get_linear_schedule_with_warmup
 
 from src.utils.utils import MODEL_CLASSES
 from src.utils.utils import get_evals_base_on_ids
+from src.utils.utils import merge_subtokens
 from src.utils.metrics import (
     get_evals,
     get_total_words,
@@ -122,15 +123,15 @@ class Trainer(object):
 
             for step, batch in enumerate(epoch_iterator):
                 self.model.train()
-                batch = tuple(t.to(self.device) for t in batch)  # GPU or CPU
+                # batch = tuple(t.to(self.device) for t in batch)  # GPU or CPU
 
                 inputs = {
-                    "input_ids": batch[0],
-                    "attention_mask": batch[1],
-                    "targets": batch[3],
+                    "input_ids": batch[0].to(self.device),
+                    "attention_mask": batch[1].to(self.device),
+                    "targets": batch[4].to(self.device),
                 }
                 if self.args.model_type != "distilbert":
-                    inputs["token_type_ids"] = batch[2]
+                    inputs["token_type_ids"] = batch[2].to(self.device)
 
                 outputs = self.model(**inputs)
                 loss = outputs[0]
@@ -211,12 +212,12 @@ class Trainer(object):
             batch = tuple(t.to(self.device) for t in batch)
             with torch.no_grad():
                 inputs = {
-                    "input_ids": batch[0],
-                    "attention_mask": batch[1],
-                    "targets": batch[3],
+                    "input_ids": batch[0].to(self.device),
+                    "attention_mask": batch[1].to(self.device),
+                    "targets": batch[4].to(self.device),
                 }
                 if self.args.model_type != "distilbert":
-                    inputs["token_type_ids"] = batch[2]
+                    inputs["token_type_ids"] = batch[2].to(self.device)
 
                 outputs = self.model(**inputs)
                 tmp_eval_loss, (logits) = outputs[:2]
@@ -228,9 +229,9 @@ class Trainer(object):
                 preds = torch.argmax(preds, dim=-1)
                 preds = preds.cpu().detach().numpy()
 
-                targets = batch[3].cpu().detach().numpy()
-                targets_ids_length = batch[4].cpu().detach().numpy()
-                # targets_length = batch[5].cpu().detach().numpy()
+                targets = batch[4].cpu().detach().numpy()
+                targets_ids_length = batch[5].cpu().detach().numpy()
+                # targets_length = batch[6].cpu().detach().numpy()
 
                 # Get evaluate based on ids
                 correct_tokens, total_tokens = get_evals_base_on_ids(preds, targets, targets_ids_length)
@@ -292,9 +293,8 @@ class Trainer(object):
             raise Exception("Some model files might be missing...")
         
     def decode_ids_to_sentence(self, ids):
-        if type(ids) == list:
-            return self.tokenizer.decode(ids)
-        return self.tokenizer.decode(ids.tolist())
+        tokens = self.tokenizer.convert_ids_to_tokens(ids)
+        return merge_subtokens(tokens)
 
     def decode_ids_to_sentence_batch(self, ids_batch, length_ids_batch):
         sentences = []

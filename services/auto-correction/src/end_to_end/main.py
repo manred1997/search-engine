@@ -5,8 +5,8 @@ import argparse
 
 sys.path.append(os.environ.get('PROJECT_PATH'))
 
-from src.end_to_end.data_loader import load_and_cache_examples
-from src.end_to_end.trainer import Trainer
+from src.end_to_end.loader.roberta_data_loader import load_and_cache_examples
+from src.end_to_end.trainer.roberta_trainer import Trainer
 from src.utils.utils import MODEL_CLASSES, MODEL_PATH_MAP
 from src.utils.utils import init_logger, load_tokenizer, set_seed
 
