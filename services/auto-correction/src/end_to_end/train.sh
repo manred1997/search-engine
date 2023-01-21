@@ -19,7 +19,7 @@ python3 src/end_to_end/main.py --token_level syllable  \
         --tuning_metric subtokens_accuracy    \
         --gpu_id 0  \
         --learning_rate $lr \
-        --train_batch_size 16   \
-        --eval_batch_size 64   \
+        --train_batch_size 8   \
+        --eval_batch_size 32   \
         --max_seq_len 128   \
         --early_stopping 50

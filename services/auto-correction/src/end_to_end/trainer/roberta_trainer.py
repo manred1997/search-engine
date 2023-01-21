@@ -19,10 +19,11 @@ from src.utils.metrics import (
     get_word_correction_rate
 )
 from src.end_to_end.early_stopping import EarlyStopping
+from src.end_to_end.trainer.trainer import Trainer
 
 logger = logging.getLogger(__name__)
 
-class Trainer(object):
+class RobertaTrainer(Trainer):
     def __init__(self,
                 args,
                 tokenizer=None,
@@ -55,10 +56,10 @@ class Trainer(object):
                 args=args
             )
         print(self.model)
-        # GPU or CPU
-        torch.cuda.set_device(self.args.gpu_id)
-        logger.info('GPU ID :',self.args.gpu_id)
-        logger.info('Cuda device:',torch.cuda.current_device())
+        # GPU or CPU or MPS
+        # torch.cuda.set_device(self.args.gpu_id)
+        # logger.info('GPU ID :',self.args.gpu_id)
+        logger.info(f'Target device is: {args.device}')
         self.device = args.device
 
         self.model.to(self.device)
@@ -209,7 +210,7 @@ class Trainer(object):
         self.model.eval()
 
         for batch in tqdm(eval_dataloader, desc="Evaluating"):
-            batch = tuple(t.to(self.device) for t in batch)
+            # batch = tuple(t.to(self.device) for t in batch)
             with torch.no_grad():
                 inputs = {
                     "input_ids": batch[0].to(self.device),

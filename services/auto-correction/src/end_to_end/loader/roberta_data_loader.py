@@ -1,12 +1,10 @@
-import copy
-import json
 import logging
 import os
 import random
 from tqdm import tqdm
 
 import torch
-from torch.utils.data import TensorDataset, Dataset
+from torch.utils.data import Dataset
 
 from src.spelling_error.component import (
     get_possible_word_from_telex_error,
@@ -20,11 +18,12 @@ from src.spelling_error.component import (
     get_homophone_double_word_error
 )
 
+from src.end_to_end.loader.data_loader import Example, Features, Processor
 
 logger = logging.getLogger(__name__)
 
 
-class InputExample(object):
+class InputExample(Example):
     """
     A single training/test example for simple sequence labeling.
     """
@@ -41,32 +40,11 @@ class InputExample(object):
         self.correct_text = correct_text
         self.label_error_detection = label_error_detection
 
-    def __repr__(self):
-        return str(self.to_json_string())
-
-    def to_dict(self):
-        """Serializes this instance to a Python dictionary."""
-        output = copy.deepcopy(self.__dict__)
-        return output
-
-    def to_json_string(self):
-        """Serializes this instance to a JSON string."""
-        return json.dumps(self.to_dict(), indent=2, sort_keys=True) + "\n"
-
-class Proccesor(object):
+class RobertaProcessor(Processor):
     """Processor for the data set """
 
     def __init__(self, args):
         self.args = args
-
-    @classmethod
-    def _read_file(cls, input_file, quotechar=None):
-        """Reads a tab separated value file."""
-        with open(input_file, "r", encoding="utf-8") as f:
-            lines = []
-            for line in f:
-                lines.append(line.strip())
-            return lines
 
     def _create_examples(self,
                         texts,
@@ -165,10 +143,9 @@ class Proccesor(object):
             set_type=mode
         )        
         
-processors = Proccesor
+processors = RobertaProcessor
 
-
-class InputFeatures(object):
+class InputFeatures(Features):
     """A single set of features of data."""
 
     def __init__(self,
@@ -193,18 +170,6 @@ class InputFeatures(object):
         self.label_ids_length = label_ids_length
         self.label_length = label_length
         self.label_sentence = label_sentence
-
-    def __repr__(self):
-        return str(self.to_json_string())
-
-    def to_dict(self):
-        """Serializes this instance to a Python dictionary."""
-        output = copy.deepcopy(self.__dict__)
-        return output
-
-    def to_json_string(self):
-        """Serializes this instance to a JSON string."""
-        return json.dumps(self.to_dict(), indent=2, sort_keys=True) + "\n"
 
 def convert_examples_to_features(
     examples,

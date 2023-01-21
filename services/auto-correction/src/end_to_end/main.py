@@ -6,7 +6,7 @@ import argparse
 sys.path.append(os.environ.get('PROJECT_PATH'))
 
 from src.end_to_end.loader.roberta_data_loader import load_and_cache_examples
-from src.end_to_end.trainer.roberta_trainer import Trainer
+from src.end_to_end.trainer.roberta_trainer import RobertaTrainer
 from src.utils.utils import MODEL_CLASSES, MODEL_PATH_MAP
 from src.utils.utils import init_logger, load_tokenizer, set_seed
 
@@ -23,7 +23,7 @@ def main(args):
     dev_dataset = load_and_cache_examples(args, tokenizer, mode="dev")
     test_dataset = load_and_cache_examples(args, tokenizer, mode="test")
 
-    trainer = Trainer(args, tokenizer, train_dataset, dev_dataset, test_dataset)
+    trainer = RobertaTrainer(args, tokenizer, train_dataset, dev_dataset, test_dataset)
 
     if args.do_eval:
         trainer.evaluate("dev")
@@ -86,8 +86,16 @@ if __name__ == "__main__":
     )
     parser.add_argument("--dropout_rate", default=0.1, type=float, help="Dropout for fully-connected layers")
     parser.add_argument("--freeze_backbone", default=False, type=bool, help="Freeze Transformer layers")
-
-
+    parser.add_argument("--encoder_emb_dim", default=256, type=int, help="Embedding dimension in Encoder block")
+    parser.add_argument("--decoder_emb_dim", default=256, type=int, help="Embedding dimension in Decoder block")
+    parser.add_argument("--encoder_hid_dim", default=512, type=int, help="Hidden state dimension of RNN module in Encoder block")
+    parser.add_argument("--decoder_hid_dim", default=512, type=int, help="Hidden state dimension of RNN module in Decoder block")
+    parser.add_argument("--encoder_dropout", default=0.1, type=float, help="Dropout for in Encoder block")
+    parser.add_argument("--decoder_dropout", default=0.1, type=float, help="Dropout for in Decoder block")
+    parser.add_argument("--use_attention", action="store_true", help="Use attention in Decoder Phase")
+    parser.add_argument("--encoder_num_layers", default=2, type=int, help="Num layers RNN module in Encoder block")
+    parser.add_argument("--encoder_bidirectional", default=True, type=bool, help="Use Bidirectional RNN in Encder block")
+    
 
 
     ## Config-Optimizer
@@ -142,6 +150,7 @@ if __name__ == "__main__":
 
     #
     args.model_name_or_path = MODEL_PATH_MAP[args.model_type]
-    args.device = "cuda" if torch.cuda.is_available() and not args.no_cuda else "cpu"
+    args.device = "mps" if torch.backends.mps.is_available() \
+        else "cuda" if torch.cuda.is_available() else "cpu"
 
     main(args)
