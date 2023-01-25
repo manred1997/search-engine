@@ -7,17 +7,21 @@ import numpy as np
 import torch
 
 from src.end_to_end.model.roberta_base import E2ESubWordSpellCheckRoberta
+from src.end_to_end.model.rnn_base import E2EChar2CharSpellCheckRNN
+from src.end_to_end.loader.rnn_char_data_loader import Seq2SeqTokenizer
 from transformers import (
     AutoTokenizer,
     RobertaConfig
 )
 
 MODEL_CLASSES = {
-    "scSubWordRoberta": (RobertaConfig, E2ESubWordSpellCheckRoberta, AutoTokenizer)
+    "scSubWordRoberta": (RobertaConfig, E2ESubWordSpellCheckRoberta, AutoTokenizer),
+    "scChar2CharRNN": (None, E2EChar2CharSpellCheckRNN, Seq2SeqTokenizer)
 }
 
 MODEL_PATH_MAP = {
     "scSubWordRoberta": "vinai/phobert-base",
+    "scChar2CharRNN": "checkpoint"
 }
 
 
