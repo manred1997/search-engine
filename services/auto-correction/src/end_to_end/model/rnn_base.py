@@ -8,7 +8,7 @@ import torch
 import torch.nn as nn
 
 
-class Seq2Seq(nn.Module):
+class E2EChar2CharSpellCheckRNN(nn.Module):
     def __init__(self,
                 input_dim,
                 output_dim,
@@ -51,11 +51,12 @@ class Seq2Seq(nn.Module):
 
     def forward(self, src, trg, teacher_forcing_ratio=0.5):
         """
-        src: Length x Batch
-        trg: Length x Batch
+        src: Batch x Length
+        trg: Batch x Length
         outputs: Batch x Length x vocab_size
         """
-
+        src = src.permute(1, 0)
+        trg = trg.permute(1, 0)
         outputs = torch.zeros(trg.shape[0], trg.shape[1], self.decoder.output_dim)
 
         encoder_outputs, encoder_hidden = self.encoder(src)
