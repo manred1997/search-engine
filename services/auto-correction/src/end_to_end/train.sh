@@ -6,7 +6,7 @@ export MODEL_DIR=scRoberta
 export MODEL_DIR=$MODEL_DIR"/"$lr"/"$s
 echo "${MODEL_DIR}"
 python3 src/end_to_end/main.py --token_level syllable  \
-        --model_type scSubWordRoberta   \
+        --model_type scChar2CharRNN   \
         --model_dir $MODEL_DIR  \
         --data_dir ../../resources/auto-correction/mini-VNTC  \
         --is_self_supervised_learning \
@@ -21,5 +21,6 @@ python3 src/end_to_end/main.py --token_level syllable  \
         --learning_rate $lr \
         --train_batch_size 8   \
         --eval_batch_size 32   \
-        --max_seq_len 128   \
-        --early_stopping 50
+        --max_seq_len 64   \
+        --early_stopping 50 \
+        --save_features

@@ -5,8 +5,9 @@ import argparse
 
 sys.path.append(os.environ.get('PROJECT_PATH'))
 
-from src.end_to_end.loader.roberta_data_loader import load_and_cache_examples
+
 from src.end_to_end.trainer.roberta_trainer import RobertaTrainer
+from src.end_to_end.trainer.rnn_trainer import RNNTrainer
 from src.utils.utils import MODEL_CLASSES, MODEL_PATH_MAP
 from src.utils.utils import init_logger, load_tokenizer, set_seed
 
@@ -19,11 +20,19 @@ def main(args):
 
     args.vocab_size = tokenizer.vocab_size
 
+    if 'roberta' in args.model_type.lower():
+        from src.end_to_end.loader.roberta_data_loader import load_and_cache_examples
+    elif 'rnn' in args.model_type.lower():
+        from src.end_to_end.loader.rnn_char_data_loader import load_and_cache_examples
+
     train_dataset = load_and_cache_examples(args, tokenizer, mode="train")
     dev_dataset = load_and_cache_examples(args, tokenizer, mode="dev")
     test_dataset = load_and_cache_examples(args, tokenizer, mode="test")
 
-    trainer = RobertaTrainer(args, tokenizer, train_dataset, dev_dataset, test_dataset)
+    if 'roberta' in args.model_type.lower():
+        trainer = RobertaTrainer(args, tokenizer, train_dataset, dev_dataset, test_dataset)
+    elif 'rnn' in args.model_type.lower():
+        trainer = RNNTrainer(args, tokenizer, train_dataset, dev_dataset, test_dataset)
 
     if args.do_eval:
         trainer.evaluate("dev")
@@ -96,10 +105,11 @@ if __name__ == "__main__":
     parser.add_argument("--encoder_num_layers", default=2, type=int, help="Num layers RNN module in Encoder block")
     parser.add_argument("--encoder_bidirectional", default=True, type=bool, help="Use Bidirectional RNN in Encder block")
     
-
+    ## Config-Objective-Function
+    parser.add_argument("--smoothing_cof", type=float, default=0.1, help="Label Smoothing confience for Objective Function Loss")
 
     ## Config-Optimizer
-    parser.add_argument("--seed", type=int, default=1, help="random seed for initialization")
+    parser.add_argument("--seed", type=int, default=1, help="Random seed for initialization")
 
     parser.add_argument("--train_batch_size", default=16, type=int, help="Batch size for training.")
     parser.add_argument("--eval_batch_size", default=16, type=int, help="Batch size for evaluation.")
