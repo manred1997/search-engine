@@ -149,7 +149,7 @@ class RNNTrainer(Trainer):
                 }
                 outputs = self.model(**inputs) # B x L x Vocab_size
 
-                outputs = outputs.view(-1, outputs.size(2))  # flatten(0, 1)
+                outputs = outputs.to(self.device).view(-1, outputs.size(2))  # flatten(0, 1)
                 targets = batch[3].to(self.device).transpose(0, 1).reshape(-1)
                 
                 loss_fct = LabelSmoothingLoss(self.args.vocab_size, padding_idx=self.tokenizer.pad_id, smoothing=self.args.smoothing_cof)
@@ -237,11 +237,12 @@ class RNNTrainer(Trainer):
                 }
                 outputs = self.model(**inputs) # B x L x Vocab_size
 
-                outputs = outputs.view(-1, outputs.size(2))  # flatten(0, 1)
+                outputs = outputs.to(self.device).view(-1, outputs.size(2))  # flatten(0, 1)
                 targets = batch[3].to(self.device).transpose(0, 1).reshape(-1)
                 
                 loss_fct = LabelSmoothingLoss(self.args.vocab_size, padding_idx=self.tokenizer.pad_id, smoothing=self.args.smoothing_cof)
                 loss_fct.to(self.device)
+
                 loss = loss_fct(outputs, targets)
 
                 eval_loss += loss.item()
