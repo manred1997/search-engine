@@ -3,14 +3,14 @@ import logging
 import os
 import sys
 
+AUTO_COMPLETE_PATH = os.environ.get("AUTO_COMPLETE_PATH")
+sys.path.append(AUTO_COMPLETE_PATH)
+
 from src.ranking.mpc import get_frequence_of_query
 from src.retrieval.binarysearch import bisect_contains_check, bisect_list_slice
 from src.utils.metric import mean_reciprocal_rank
 from src.utils.utils import _read_text_file, init_logger
 from tqdm import tqdm
-
-AUTO_COMPLETE_PATH = os.environ.get("AUTO_COMPLETE_PATH")
-sys.path.append(AUTO_COMPLETE_PATH)
 
 logger = logging.getLogger(__name__)
 

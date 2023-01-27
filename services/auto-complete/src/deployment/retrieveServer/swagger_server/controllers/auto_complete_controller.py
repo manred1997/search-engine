@@ -1,15 +1,17 @@
 import os
 import sys
 
+AUTO_COMPLETE_PATH = os.environ.get("AUTO_COMPLETE_PATH")
+SEARCH_ENGINE_PATH = os.environ.get("SEARCH_ENGINE_PATH")
+
+sys.path.append(AUTO_COMPLETE_PATH)
+
 import connexion
 from src.retrieval.config import settings
 from src.retrieval.prefixtrie import Trie
 from src.utils.utils import _read_text_file
 
-AUTO_COMPLETE_PATH = os.environ.get("AUTO_COMPLETE_PATH")
-SEARCH_ENGINE_PATH = os.environ.get("SEARCH_ENGINE_PATH")
 
-sys.path.append(AUTO_COMPLETE_PATH)
 
 
 query_logs = _read_text_file(

@@ -2,6 +2,8 @@ import argparse
 import os
 import sys
 
+sys.path.append(os.environ.get("PROJECT_PATH"))
+
 import torch
 from src.end_to_end.trainer.rnn_trainer import RNNTrainer
 from src.end_to_end.trainer.roberta_trainer import RobertaTrainer
@@ -12,9 +14,6 @@ from src.utils.utils import (
     load_tokenizer,
     set_seed,
 )
-
-sys.path.append(os.environ.get("PROJECT_PATH"))
-
 
 def main(args):
 
