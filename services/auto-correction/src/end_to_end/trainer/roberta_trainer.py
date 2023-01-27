@@ -1,36 +1,29 @@
-import os
 import logging
-from tqdm.auto import tqdm, trange
-from typing import Union
+import os
 
 import torch
 import torch.nn.functional as F
-from torch.utils.tensorboard import SummaryWriter
-from torch.utils.data import DataLoader, RandomSampler, SequentialSampler
-from transformers import AdamW, get_linear_schedule_with_warmup
-
-from src.utils.utils import MODEL_CLASSES
-from src.utils.utils import get_evals_base_on_ids
-from src.utils.utils import merge_subtokens
-from src.utils.metrics import (
-    get_evals,
-    get_total_words,
-    get_word_accuracy,
-    get_word_correction_rate
-)
 from src.end_to_end.early_stopping import EarlyStopping
 from src.end_to_end.trainer.trainer import Trainer
+from src.utils.utils import MODEL_CLASSES, get_evals_base_on_ids, merge_subtokens
+from torch.utils.data import DataLoader, RandomSampler, SequentialSampler
+from torch.utils.tensorboard import SummaryWriter
+from tqdm.auto import tqdm, trange
+from transformers import AdamW, get_linear_schedule_with_warmup
 
 logger = logging.getLogger(__name__)
 
+
 class RobertaTrainer(Trainer):
-    def __init__(self,
-                args,
-                tokenizer=None,
-                train_dataset=None,
-                dev_dataset=None,
-                test_dataset=None):
-                
+    def __init__(
+        self,
+        args,
+        tokenizer=None,
+        train_dataset=None,
+        dev_dataset=None,
+        test_dataset=None,
+    ):
+
         self.args = args
         self.tokenizer = tokenizer
         self.train_dataset = train_dataset
@@ -42,63 +35,86 @@ class RobertaTrainer(Trainer):
         self.config_class, self.model_class, _ = MODEL_CLASSES[args.model_type]
 
         if args.pretrained:
-            self.config = self.config_class.from_pretrained(args.pretrained_path, finetuning_task=args.token_level)
+            self.config = self.config_class.from_pretrained(
+                args.pretrained_path, finetuning_task=args.token_level
+            )
             self.model = self.model_class.from_pretrained(
-                args.pretrained_path,
-                config=self.config,
-                args=args
+                args.pretrained_path, config=self.config, args=args
             )
         else:
-            self.config = self.config_class.from_pretrained(args.model_name_or_path, finetuning_task=args.token_level)
+            self.config = self.config_class.from_pretrained(
+                args.model_name_or_path, finetuning_task=args.token_level
+            )
             self.model = self.model_class.from_pretrained(
-                args.model_name_or_path,
-                config=self.config,
-                args=args
+                args.model_name_or_path, config=self.config, args=args
             )
         print(self.model)
         # GPU or CPU or MPS
         # torch.cuda.set_device(self.args.gpu_id)
         # logger.info('GPU ID :',self.args.gpu_id)
-        logger.info(f'Target device is: {args.device}')
+        logger.info(f"Target device is: {args.device}")
         self.device = args.device
 
         self.model.to(self.device)
-        model_parameters =  sum(p.numel() for p in self.model.parameters() if p.requires_grad)  
-        logger.info('No.Params of model:',model_parameters)
+        model_parameters = sum(
+            p.numel() for p in self.model.parameters() if p.requires_grad
+        )
+        logger.info("No.Params of model:", model_parameters)
 
     def train(self):
         train_sampler = RandomSampler(self.train_dataset)
-        train_dataloader = DataLoader(self.train_dataset, sampler=train_sampler, batch_size=self.args.train_batch_size)
+        train_dataloader = DataLoader(
+            self.train_dataset,
+            sampler=train_sampler,
+            batch_size=self.args.train_batch_size,
+        )
 
         writer = SummaryWriter(log_dir=self.args.model_dir)
 
         if self.args.max_steps > 0:
             t_total = self.args.max_steps
             self.args.num_train_epochs = (
-                self.args.max_steps // (len(train_dataloader) // self.args.gradient_accumulation_steps) + 1
+                self.args.max_steps
+                // (len(train_dataloader) // self.args.gradient_accumulation_steps)
+                + 1
             )
         else:
-            t_total = len(train_dataloader) // self.args.gradient_accumulation_steps * self.args.num_train_epochs
+            t_total = (
+                len(train_dataloader)
+                // self.args.gradient_accumulation_steps
+                * self.args.num_train_epochs
+            )
 
         # Prepare optimizer and schedule (linear warmup and decay)
-        no_decay = ['bias', 'LayerNorm.bias', 'LayerNorm.weight']
+        no_decay = ["bias", "LayerNorm.bias", "LayerNorm.weight"]
         optimizer_grouped_parameters = [
             {
-                "params": [p for n, p in self.model.named_parameters() if not any(nd in n for nd in no_decay)],
+                "params": [
+                    p
+                    for n, p in self.model.named_parameters()
+                    if not any(nd in n for nd in no_decay)
+                ],
                 "weight_decay": self.args.weight_decay,
             },
             {
-                "params": [p for n, p in self.model.named_parameters() if any(nd in n for nd in no_decay)],
+                "params": [
+                    p
+                    for n, p in self.model.named_parameters()
+                    if any(nd in n for nd in no_decay)
+                ],
                 "weight_decay": 0.0,
             },
         ]
         optimizer = AdamW(
             optimizer_grouped_parameters,
-                lr=self.args.learning_rate,
-                eps=self.args.adam_epsilon)
+            lr=self.args.learning_rate,
+            eps=self.args.adam_epsilon,
+        )
 
         scheduler = get_linear_schedule_with_warmup(
-            optimizer, num_warmup_steps=self.args.warmup_steps, num_training_steps=t_total
+            optimizer,
+            num_warmup_steps=self.args.warmup_steps,
+            num_training_steps=t_total,
         )
 
         # Train!
@@ -106,7 +122,9 @@ class RobertaTrainer(Trainer):
         logger.info("  Num examples = %d", len(self.train_dataset))
         logger.info("  Num Epochs = %d", self.args.num_train_epochs)
         logger.info("  Total train batch size = %d", self.args.train_batch_size)
-        logger.info("  Gradient Accumulation steps = %d", self.args.gradient_accumulation_steps)
+        logger.info(
+            "  Gradient Accumulation steps = %d", self.args.gradient_accumulation_steps
+        )
         logger.info("  Total optimization steps = %d", t_total)
         logger.info("  Logging steps = %d", self.args.logging_steps)
         logger.info("  Save steps = %d", self.args.save_steps)
@@ -119,7 +137,9 @@ class RobertaTrainer(Trainer):
         early_stopping = EarlyStopping(patience=self.args.early_stopping, verbose=True)
 
         for _ in train_iterator:
-            epoch_iterator = tqdm(train_dataloader, desc="Iteration", position=0, leave=True)
+            epoch_iterator = tqdm(
+                train_dataloader, desc="Iteration", position=0, leave=True
+            )
             logger.info("Epoch", _)
 
             for step, batch in enumerate(epoch_iterator):
@@ -144,19 +164,26 @@ class RobertaTrainer(Trainer):
 
                 tr_loss += loss.item()
                 if (step + 1) % self.args.gradient_accumulation_steps == 0:
-                    torch.nn.utils.clip_grad_norm_(self.model.parameters(), self.args.max_grad_norm)
+                    torch.nn.utils.clip_grad_norm_(
+                        self.model.parameters(), self.args.max_grad_norm
+                    )
 
                     optimizer.step()
                     scheduler.step()  # Update learning rate schedule
                     self.model.zero_grad()
                     global_step += 1
 
-                    if self.args.logging_steps > 0 and global_step % self.args.logging_steps == 0:
+                    if (
+                        self.args.logging_steps > 0
+                        and global_step % self.args.logging_steps == 0
+                    ):
                         print("\nTuning metrics:", self.args.tuning_metric)
                         results = self.evaluate("dev")
                         for metric, value in results.items():
                             writer.add_scalar(f"{metric}", value, _)
-                        early_stopping(results[self.args.tuning_metric], self.model, self.args)
+                        early_stopping(
+                            results[self.args.tuning_metric], self.model, self.args
+                        )
                         if early_stopping.early_stop:
                             print("Early stopping")
                             break
@@ -194,7 +221,9 @@ class RobertaTrainer(Trainer):
             raise Exception("Only dev and test dataset available")
 
         eval_sampler = SequentialSampler(dataset)
-        eval_dataloader = DataLoader(dataset, sampler=eval_sampler, batch_size=self.args.eval_batch_size)
+        eval_dataloader = DataLoader(
+            dataset, sampler=eval_sampler, batch_size=self.args.eval_batch_size
+        )
 
         # Eval!
         logger.info("***** Running evaluation on %s dataset *****", mode)
@@ -224,8 +253,8 @@ class RobertaTrainer(Trainer):
                 tmp_eval_loss, (logits) = outputs[:2]
 
                 eval_loss += tmp_eval_loss.mean().item()
-                
-                # 
+
+                #
                 preds = F.softmax(logits, dim=-1)
                 preds = torch.argmax(preds, dim=-1)
                 preds = preds.cpu().detach().numpy()
@@ -235,7 +264,9 @@ class RobertaTrainer(Trainer):
                 # targets_length = batch[6].cpu().detach().numpy()
 
                 # Get evaluate based on ids
-                correct_tokens, total_tokens = get_evals_base_on_ids(preds, targets, targets_ids_length)
+                correct_tokens, total_tokens = get_evals_base_on_ids(
+                    preds, targets, targets_ids_length
+                )
                 eval_correct_subtokens += correct_tokens
                 eval_total_subtokens += total_tokens
 
@@ -243,19 +274,14 @@ class RobertaTrainer(Trainer):
                 # target_sentences = self.decode_ids_to_sentence_batch(targets, targets_ids_length)
                 # pred_sentences = self.decode_ids_to_sentence_batch(preds, targets_ids_length)
 
-
-
-                
-
             nb_eval_steps += 1
 
         eval_loss = eval_loss / nb_eval_steps
 
         results = {
             "loss": eval_loss,
-            "subtokens_accuracy": eval_correct_subtokens/eval_total_subtokens
+            "subtokens_accuracy": eval_correct_subtokens / eval_total_subtokens,
         }
-
 
         logger.info("***** Eval results *****")
         for key in sorted(results.keys()):
@@ -270,7 +296,9 @@ class RobertaTrainer(Trainer):
         # Save model checkpoint (Overwrite)
         if not os.path.exists(self.args.model_dir):
             os.makedirs(self.args.model_dir)
-        model_to_save = self.model.module if hasattr(self.model, "module") else self.model
+        model_to_save = (
+            self.model.module if hasattr(self.model, "module") else self.model
+        )
         model_to_save.save_pretrained(self.args.model_dir)
 
         # Save training arguments together with the trained model
@@ -284,15 +312,13 @@ class RobertaTrainer(Trainer):
 
         try:
             self.model = self.model_class.from_pretrained(
-                self.args.model_dir,
-                config=self.config,
-                args=self.args
+                self.args.model_dir, config=self.config, args=self.args
             )
             self.model.to(self.device)
             logger.info("***** Model Loaded *****")
         except Exception:
             raise Exception("Some model files might be missing...")
-        
+
     def decode_ids_to_sentence(self, ids):
         tokens = self.tokenizer.convert_ids_to_tokens(ids)
         return merge_subtokens(tokens)
@@ -300,6 +326,6 @@ class RobertaTrainer(Trainer):
     def decode_ids_to_sentence_batch(self, ids_batch, length_ids_batch):
         sentences = []
         for ids, length in zip(ids_batch, length_ids_batch):
-            ids = ids[1: length+1] # Remove [CLS], [SEP], [PAD] ids
+            ids = ids[1 : length + 1]  # Remove [CLS], [SEP], [PAD] ids
             sentences.append(self.decode_ids_to_sentence(ids))
         return sentences

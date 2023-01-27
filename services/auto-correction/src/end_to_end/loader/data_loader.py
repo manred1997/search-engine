@@ -1,7 +1,7 @@
 import copy
 import json
-
 from abc import ABC, abstractmethod
+
 
 class Example(ABC):
     def __init__(self, **kwargs):
@@ -19,6 +19,7 @@ class Example(ABC):
         """Serializes this instance to a JSON string."""
         return json.dumps(self.to_dict(), indent=2, sort_keys=True) + "\n"
 
+
 class Features(ABC):
     def __init__(self, **kwargs):
         pass
@@ -34,6 +35,7 @@ class Features(ABC):
     def to_json_string(self):
         """Serializes this instance to a JSON string."""
         return json.dumps(self.to_dict(), indent=2, sort_keys=True) + "\n"
+
 
 class Processor(ABC):
     def __init__(self, **kwargs):
@@ -55,4 +57,3 @@ class Processor(ABC):
     @abstractmethod
     def get_examples(self):
         pass
-    

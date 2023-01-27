@@ -1,0 +1,4 @@
+[flake8]
+ignore=E203,W503,E231,F601,E731,E501,E266,W605
+exclude = docs,migrations,.git,.ropeproject,minio_storage,node_modules
+max-line-length = 95

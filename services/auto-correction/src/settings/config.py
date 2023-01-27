@@ -1,8 +1,8 @@
+from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
 
 from pydantic import AnyHttpUrl, BaseSettings, PostgresDsn, validator
 
-from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
@@ -43,7 +43,7 @@ class Settings(BaseSettings):
         elif isinstance(v, (list, str)):
             return v
         raise ValueError(v)
-    
+
     class Config:
         """Defines configuration for pydantic environment loading"""
 

@@ -1,13 +1,6 @@
 import regex as re
+from src.utils.utils import is_valid_vietnam_word, vowel, vowel_to_idx
 
-from src.utils.utils import (
-    is_valid_vietnam_word
-)
-
-from src.utils.utils import (
-    vowel,
-    vowel_to_idx
-)
 
 def normalize_encode(text):
     """
@@ -15,19 +8,23 @@ def normalize_encode(text):
     params:
         raw text
     return:
-        normalization text 
+        normalization text
     """
     dicchar = {}
-    char1252 = 'à|á|ả|ã|ạ|ầ|ấ|ẩ|ẫ|ậ|ằ|ắ|ẳ|ẵ|ặ|è|é|ẻ|ẽ|ẹ|ề|ế|ể|ễ|ệ|ì|í|ỉ|ĩ|ị|ò|ó|ỏ|õ|ọ|ồ|ố|ổ|ỗ|ộ|ờ|ớ|ở|ỡ|ợ|ù|ú|ủ|ũ|ụ|ừ|ứ|ử|ữ|ự|ỳ|ý|ỷ|ỹ|ỵ|À|Á|Ả|Ã|Ạ|Ầ|Ấ|Ẩ|Ẫ|Ậ|Ằ|Ắ|Ẳ|Ẵ|Ặ|È|É|Ẻ|Ẽ|Ẹ|Ề|Ế|Ể|Ễ|Ệ|Ì|Í|Ỉ|Ĩ|Ị|Ò|Ó|Ỏ|Õ|Ọ|Ồ|Ố|Ổ|Ỗ|Ộ|Ờ|Ớ|Ở|Ỡ|Ợ|Ù|Ú|Ủ|Ũ|Ụ|Ừ|Ứ|Ử|Ữ|Ự|Ỳ|Ý|Ỷ|Ỹ|Ỵ'.split(
-            '|')
+    char1252 = "à|á|ả|ã|ạ|ầ|ấ|ẩ|ẫ|ậ|ằ|ắ|ẳ|ẵ|ặ|è|é|ẻ|ẽ|ẹ|ề|ế|ể|ễ|ệ|ì|í|ỉ|ĩ|ị|ò|ó|ỏ|õ|ọ|ồ|ố|ổ|ỗ|ộ|ờ|ớ|ở|ỡ|ợ|ù|ú|ủ|ũ|ụ|ừ|ứ|ử|ữ|ự|ỳ|ý|ỷ|ỹ|ỵ|À|Á|Ả|Ã|Ạ|Ầ|Ấ|Ẩ|Ẫ|Ậ|Ằ|Ắ|Ẳ|Ẵ|Ặ|È|É|Ẻ|Ẽ|Ẹ|Ề|Ế|Ể|Ễ|Ệ|Ì|Í|Ỉ|Ĩ|Ị|Ò|Ó|Ỏ|Õ|Ọ|Ồ|Ố|Ổ|Ỗ|Ộ|Ờ|Ớ|Ở|Ỡ|Ợ|Ù|Ú|Ủ|Ũ|Ụ|Ừ|Ứ|Ử|Ữ|Ự|Ỳ|Ý|Ỷ|Ỹ|Ỵ".split(
+        "|"
+    )
     charutf8 = "à|á|ả|ã|ạ|ầ|ấ|ẩ|ẫ|ậ|ằ|ắ|ẳ|ẵ|ặ|è|é|ẻ|ẽ|ẹ|ề|ế|ể|ễ|ệ|ì|í|ỉ|ĩ|ị|ò|ó|ỏ|õ|ọ|ồ|ố|ổ|ỗ|ộ|ờ|ớ|ở|ỡ|ợ|ù|ú|ủ|ũ|ụ|ừ|ứ|ử|ữ|ự|ỳ|ý|ỷ|ỹ|ỵ|À|Á|Ả|Ã|Ạ|Ầ|Ấ|Ẩ|Ẫ|Ậ|Ằ|Ắ|Ẳ|Ẵ|Ặ|È|É|Ẻ|Ẽ|Ẹ|Ề|Ế|Ể|Ễ|Ệ|Ì|Í|Ỉ|Ĩ|Ị|Ò|Ó|Ỏ|Õ|Ọ|Ồ|Ố|Ổ|Ỗ|Ộ|Ờ|Ớ|Ở|Ỡ|Ợ|Ù|Ú|Ủ|Ũ|Ụ|Ừ|Ứ|Ử|Ữ|Ự|Ỳ|Ý|Ỷ|Ỹ|Ỵ".split(
-        '|')
+        "|"
+    )
     for i in range(len(char1252)):
         dicchar[char1252[i]] = charutf8[i]
 
     return re.sub(
-        r'à|á|ả|ã|ạ|ầ|ấ|ẩ|ẫ|ậ|ằ|ắ|ẳ|ẵ|ặ|è|é|ẻ|ẽ|ẹ|ề|ế|ể|ễ|ệ|ì|í|ỉ|ĩ|ị|ò|ó|ỏ|õ|ọ|ồ|ố|ổ|ỗ|ộ|ờ|ớ|ở|ỡ|ợ|ù|ú|ủ|ũ|ụ|ừ|ứ|ử|ữ|ự|ỳ|ý|ỷ|ỹ|ỵ|À|Á|Ả|Ã|Ạ|Ầ|Ấ|Ẩ|Ẫ|Ậ|Ằ|Ắ|Ẳ|Ẵ|Ặ|È|É|Ẻ|Ẽ|Ẹ|Ề|Ế|Ể|Ễ|Ệ|Ì|Í|Ỉ|Ĩ|Ị|Ò|Ó|Ỏ|Õ|Ọ|Ồ|Ố|Ổ|Ỗ|Ộ|Ờ|Ớ|Ở|Ỡ|Ợ|Ù|Ú|Ủ|Ũ|Ụ|Ừ|Ứ|Ử|Ữ|Ự|Ỳ|Ý|Ỷ|Ỹ|Ỵ',
-        lambda x: dicchar[x.group()], text)
+        r"à|á|ả|ã|ạ|ầ|ấ|ẩ|ẫ|ậ|ằ|ắ|ẳ|ẵ|ặ|è|é|ẻ|ẽ|ẹ|ề|ế|ể|ễ|ệ|ì|í|ỉ|ĩ|ị|ò|ó|ỏ|õ|ọ|ồ|ố|ổ|ỗ|ộ|ờ|ớ|ở|ỡ|ợ|ù|ú|ủ|ũ|ụ|ừ|ứ|ử|ữ|ự|ỳ|ý|ỷ|ỹ|ỵ|À|Á|Ả|Ã|Ạ|Ầ|Ấ|Ẩ|Ẫ|Ậ|Ằ|Ắ|Ẳ|Ẵ|Ặ|È|É|Ẻ|Ẽ|Ẹ|Ề|Ế|Ể|Ễ|Ệ|Ì|Í|Ỉ|Ĩ|Ị|Ò|Ó|Ỏ|Õ|Ọ|Ồ|Ố|Ổ|Ỗ|Ộ|Ờ|Ớ|Ở|Ỡ|Ợ|Ù|Ú|Ủ|Ũ|Ụ|Ừ|Ứ|Ử|Ữ|Ự|Ỳ|Ý|Ỷ|Ỹ|Ỵ",
+        lambda x: dicchar[x.group()],
+        text,
+    )
 
 
 def normalize_word_diacritic(word):
@@ -40,7 +37,7 @@ def normalize_word_diacritic(word):
     """
     if not is_valid_vietnam_word(word):
         return word
-    
+
     chars = list(word)
     diacritic = 0
     vowel_index = []
@@ -50,12 +47,12 @@ def normalize_word_diacritic(word):
         if x == -1:
             continue
         elif x == 9:  # check qu
-            if index != 0 and chars[index - 1] == 'q':
-                chars[index] = 'u'
+            if index != 0 and chars[index - 1] == "q":
+                chars[index] = "u"
                 qu_or_gi = True
         elif x == 5:  # check gi
-            if index != 0 and chars[index - 1] == 'g':
-                chars[index] = 'i'
+            if index != 0 and chars[index - 1] == "g":
+                chars[index] = "i"
                 qu_or_gi = True
         if y != 0:
             diacritic = y
@@ -72,8 +69,10 @@ def normalize_word_diacritic(word):
                 if x != -1:
                     chars[2] = vowel[x][diacritic]
                 else:
-                    chars[1] = vowel[5][diacritic] if chars[1] == 'i' else vowel[9][diacritic]
-            return ''.join(chars)
+                    chars[1] = (
+                        vowel[5][diacritic] if chars[1] == "i" else vowel[9][diacritic]
+                    )
+            return "".join(chars)
         return word
 
     for index in vowel_index:
@@ -84,7 +83,7 @@ def normalize_word_diacritic(word):
             #     if index2 != index:
             #         x, y = vowel_to_idx[chars[index]]
             #         chars[index2] = vowel[x][0]
-            return ''.join(chars)
+            return "".join(chars)
 
     if len(vowel_index) == 2:
         if vowel_index[-1] == len(chars) - 1:
@@ -104,7 +103,8 @@ def normalize_word_diacritic(word):
         chars[vowel_index[1]] = vowel[x][diacritic]
         # x, y = vowel_to_idx[chars[vowel_index[2]]]
         # chars[vowel_index[2]] = vowel[x][0]
-    return ''.join(chars)
+    return "".join(chars)
+
 
 def normalize_diacritic(text):
     """
@@ -118,10 +118,9 @@ def normalize_diacritic(text):
     sentence = text
     words = sentence.split()
     for index, word in enumerate(words):
-        cw = re.sub(r'(^\p{P}*)([p{L}.]*\p{L}+)(\p{P}*$)', r'\1/\2/\3', word).split('/')
+        cw = re.sub(r"(^\p{P}*)([p{L}.]*\p{L}+)(\p{P}*$)", r"\1/\2/\3", word).split("/")
         # print(cw)
         if len(cw) == 3:
             cw[1] = normalize_word_diacritic(cw[1])
-        words[index] = ''.join(cw)
-    return ' '.join(words)
-
+        words[index] = "".join(cw)
+    return " ".join(words)
