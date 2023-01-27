@@ -252,8 +252,7 @@ class RNNTrainer(Trainer):
         eval_loss = eval_loss / nb_eval_steps
 
         results = {
-            "loss": eval_loss,
-            "subtokens_accuracy": eval_correct_subtokens/eval_total_subtokens
+            "loss": eval_loss
         }
 
 
@@ -271,7 +270,7 @@ class RNNTrainer(Trainer):
         if not os.path.exists(self.args.model_dir):
             os.makedirs(self.args.model_dir)
         model_to_save = self.model.module if hasattr(self.model, "module") else self.model
-        model_to_save.save_pretrained(self.args.model_dir)
+        torch.save(model_to_save.state_dict(), os.path.join(self.args.model_dir, "model_weights.pth"))
 
         # Save training arguments together with the trained model
         torch.save(self.args, os.path.join(self.args.model_dir, "training_args.bin"))
@@ -283,11 +282,14 @@ class RNNTrainer(Trainer):
             raise Exception("Model doesn't exists! Train first!")
 
         try:
-            self.model = self.model_class.from_pretrained(
-                self.args.model_dir,
-                config=self.config,
-                args=self.args
-            )
+            self.model.load_state_dict(
+                torch.load(
+                    os.path.join(
+                        self.args.model_dir,
+                        "model_weights.pth"
+                        )
+                    )
+                )
             self.model.to(self.device)
             logger.info("***** Model Loaded *****")
         except Exception:
