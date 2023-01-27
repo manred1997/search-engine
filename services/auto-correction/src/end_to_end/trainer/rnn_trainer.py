@@ -71,10 +71,10 @@ class RNNTrainer(Trainer):
         self.device = args.device
 
         self.model.to(self.device)
-        # model_parameters = sum(
-        #     p.numel() for p in self.model.parameters() if p.requires_grad
-        # )
-        # logger.info("No.Params of model:", model_parameters)
+        model_parameters = sum(
+            p.numel() for p in self.model.parameters() if p.requires_grad
+        )
+        logger.info(f"No.Params of model: {str(model_parameters)}", )
 
     def train(self):
         train_sampler = RandomSampler(self.train_dataset)
