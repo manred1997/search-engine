@@ -1,50 +1,49 @@
-import os
 import json
 import logging
-
+import os
 import random
+
 import numpy as np
 import torch
-
-from src.end_to_end.model.roberta_base import E2ESubWordSpellCheckRoberta
-from src.end_to_end.model.rnn_base import E2EChar2CharSpellCheckRNN
 from src.end_to_end.loader.rnn_char_data_loader import Seq2SeqTokenizer
-from transformers import (
-    AutoTokenizer,
-    RobertaConfig
-)
+from src.end_to_end.model.rnn_base import E2EChar2CharSpellCheckRNN
+from src.end_to_end.model.roberta_base import E2ESubWordSpellCheckRoberta
+from transformers import AutoTokenizer, RobertaConfig
 
 MODEL_CLASSES = {
     "scSubWordRoberta": (RobertaConfig, E2ESubWordSpellCheckRoberta, AutoTokenizer),
-    "scChar2CharRNN": (None, E2EChar2CharSpellCheckRNN, Seq2SeqTokenizer)
+    "scChar2CharRNN": (None, E2EChar2CharSpellCheckRNN, Seq2SeqTokenizer),
 }
 
 MODEL_PATH_MAP = {
     "scSubWordRoberta": "vinai/phobert-base",
-    "scChar2CharRNN": "checkpoint"
+    "scChar2CharRNN": "checkpoint",
 }
 
 
 logger = logging.getLogger(__name__)
 
 
-vowel = [['a', 'à', 'á', 'ả', 'ã', 'ạ', 'a'],
-        ['ă', 'ằ', 'ắ', 'ẳ', 'ẵ', 'ặ', 'aw'],
-        ['â', 'ầ', 'ấ', 'ẩ', 'ẫ', 'ậ', 'aa'],
-        ['e', 'è', 'é', 'ẻ', 'ẽ', 'ẹ', 'e'],
-        ['ê', 'ề', 'ế', 'ể', 'ễ', 'ệ', 'ee'],
-        ['i', 'ì', 'í', 'ỉ', 'ĩ', 'ị', 'i'],
-        ['o', 'ò', 'ó', 'ỏ', 'õ', 'ọ', 'o'],
-        ['ô', 'ồ', 'ố', 'ổ', 'ỗ', 'ộ', 'oo'],
-        ['ơ', 'ờ', 'ớ', 'ở', 'ỡ', 'ợ', 'ow'],
-        ['u', 'ù', 'ú', 'ủ', 'ũ', 'ụ', 'u'],
-        ['ư', 'ừ', 'ứ', 'ử', 'ữ', 'ự', 'uw'],
-        ['y', 'ỳ', 'ý', 'ỷ', 'ỹ', 'ỵ', 'y']]
+vowel = [
+    ["a", "à", "á", "ả", "ã", "ạ", "a"],
+    ["ă", "ằ", "ắ", "ẳ", "ẵ", "ặ", "aw"],
+    ["â", "ầ", "ấ", "ẩ", "ẫ", "ậ", "aa"],
+    ["e", "è", "é", "ẻ", "ẽ", "ẹ", "e"],
+    ["ê", "ề", "ế", "ể", "ễ", "ệ", "ee"],
+    ["i", "ì", "í", "ỉ", "ĩ", "ị", "i"],
+    ["o", "ò", "ó", "ỏ", "õ", "ọ", "o"],
+    ["ô", "ồ", "ố", "ổ", "ỗ", "ộ", "oo"],
+    ["ơ", "ờ", "ớ", "ở", "ỡ", "ợ", "ow"],
+    ["u", "ù", "ú", "ủ", "ũ", "ụ", "u"],
+    ["ư", "ừ", "ứ", "ử", "ữ", "ự", "uw"],
+    ["y", "ỳ", "ý", "ỷ", "ỹ", "ỵ", "y"],
+]
 
 vowel_to_idx = {}
 for i in range(len(vowel)):
     for j in range(len(vowel[i]) - 1):
         vowel_to_idx[vowel[i][j]] = (i, j)
+
 
 def init_logger():
     logging.basicConfig(
@@ -53,54 +52,61 @@ def init_logger():
         level=logging.INFO,
     )
 
+
 def set_seed(seed):
     random.seed(seed)
     np.random.seed(seed)
     torch.manual_seed(seed)
 
+
 def load_tokenizer(args):
     logger.info(f"Loadding Tokenizer from {args.model_name_or_path}")
     return MODEL_CLASSES[args.model_type][2].from_pretrained(args.model_name_or_path)
 
+
 def _read_json_file(filename):
     logger.info("Reading json file from {}".format(filename))
-    with open(filename, 'r', encoding='utf-8') as f:
+    with open(filename, "r", encoding="utf-8") as f:
         data = json.load(f)
     logger.info("Reading done")
     return data
 
+
 def _write_json_file(filename, data):
     logger.info("Writing json file at {}".format(filename))
-    foldername = filename.split('/')[:-1]
+    foldername = filename.split("/")[:-1]
     if foldername:
         foldername = "/".join(foldername)
         if not os.path.exists(foldername):
             os.mkdir(foldername)
-    with open(filename, 'w', encoding='utf-8') as f:
+    with open(filename, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False)
     logger.info("Writing done")
-    
+
+
 def _read_text_file(filename):
     logger.info("Reading text file from {}".format(filename))
     data = []
-    with open(filename, 'r', encoding='utf-8') as f:
+    with open(filename, "r", encoding="utf-8") as f:
         for line in f.readlines():
             data.append(line.strip())
     logger.info("Reading done")
     return data
 
+
 def _write_text_file(filename, data):
     logger.info("Writing text file at {}".format(filename))
     assert type(data) is list
-    foldername = filename.split('/')[:-1]
+    foldername = filename.split("/")[:-1]
     if foldername:
         foldername = "/".join(foldername)
         if not os.path.exists(foldername):
             os.mkdir(foldername)
-    with open(filename, 'w', encoding='utf-8') as f:
+    with open(filename, "w", encoding="utf-8") as f:
         for item in data:
             f.write("%s\n" % item)
     logger.info("Writing done")
+
 
 def is_valid_vietnam_word(word):
     chars = list(word)
@@ -117,9 +123,10 @@ def is_valid_vietnam_word(word):
     return True
 
 
-def chunks(l, n):
-    for i in range(0, len(l) - n + 1):
-        yield l[i:i+n]
+def chunks(length, n):
+    for i in range(0, len(length) - n + 1):
+        yield length[i : i + n]
+
 
 def merge_subtokens(tokens):
     merged_tokens = []
@@ -131,10 +138,11 @@ def merge_subtokens(tokens):
     text = " ".join(merged_tokens)
     return text
 
+
 def get_evals_base_on_ids(preds, targets, lengths=None):
     """
-    given the predicted word idxs, this method computes the accuracy 
-    by matching all values from 0 index to lengths index along each 
+    given the predicted word idxs, this method computes the accuracy
+    by matching all values from 0 index to lengths index along each
     batch example if have lengths param
     """
 
@@ -143,7 +151,7 @@ def get_evals_base_on_ids(preds, targets, lengths=None):
     if lengths is not None:
         assert len(preds) == len(targets) == len(lengths)
         for pred, target, l in zip(preds, targets, lengths):
-            correct += (pred[1:l+1] == target[1:l+1]).sum()
+            correct += (pred[1 : l + 1] == target[1 : l + 1]).sum()
             total += l
     else:
         assert len(preds) == len(targets)

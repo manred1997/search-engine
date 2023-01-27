@@ -1,13 +1,12 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+
+
 class LayerClassifier(nn.Module):
-    def __init__(self,
-                input_dim,
-                output_dim,
-                drop_rate=0.0) -> None:
+    def __init__(self, input_dim, output_dim, drop_rate=0.0) -> None:
         super().__init__()
-        
+
         self.dropout = nn.Dropout(drop_rate)
         self.linear = nn.Linear(input_dim, output_dim)
 
@@ -15,13 +14,11 @@ class LayerClassifier(nn.Module):
         x = self.dropout(x)
         return self.linear(x)
 
-class Attention(nn.Module):
 
-    def __init__(self,
-                encoder_hid_dim,
-                decoder_hid_dim,
-                attention_type='bahdanau',
-                **kwargs):
+class Attention(nn.Module):
+    def __init__(
+        self, encoder_hid_dim, decoder_hid_dim, attention_type="bahdanau", **kwargs
+    ):
         super().__init__()
 
         self.attention_type = attention_type
@@ -45,29 +42,37 @@ class Attention(nn.Module):
         outputs: Batch x Length
         """
 
-        decoder_hidden = decoder_hidden.unsqueeze(1).repeat(1, encoder_outputs.shape[0], 1) # Batch x Length x Decoder_hidden_dim
+        decoder_hidden = decoder_hidden.unsqueeze(1).repeat(
+            1, encoder_outputs.shape[0], 1
+        )  # Batch x Length x Decoder_hidden_dim
 
-        encoder_outputs = encoder_outputs.permute(1, 0, 2) # Batch x Length x (Encoder_hidden_dim * 2 if bidirectional = True else 1)
+        encoder_outputs = encoder_outputs.permute(
+            1, 0, 2
+        )  # Batch x Length x (Encoder_hidden_dim * 2 if bidirectional = True else 1)
 
-        if self.attention_type == 'bahdanau':
+        if self.attention_type == "bahdanau":
             alignment_score = torch.cat((decoder_hidden, encoder_outputs), dim=2)
-            energy = torch.tanh(self.attn(alignment_score)) # Batch x Length x Decoder_hidden_dim
-            attention = self.v(energy).squeeze(2) # Batch x Length
-        elif self.attention_type == 'luong':
-            pass #TODO
+            energy = torch.tanh(
+                self.attn(alignment_score)
+            )  # Batch x Length x Decoder_hidden_dim
+            attention = self.v(energy).squeeze(2)  # Batch x Length
+        elif self.attention_type == "luong":
+            pass  # TODO
         else:
-            raise Exception(f"For type attention, Only bahdanau, luong is available")
+            raise Exception("For type attention, Only bahdanau, luong is available")
         return F.softmax(attention, dim=1)
 
+
 class EncoderRNN(nn.Module):
-    def __init__(self,
-                input_dim,
-                encoder_emb_dim,
-                encoder_hid_dim,
-                encoder_fc_hid_dim,
-                encoder_dropout,
-                **kwargs
-                ) -> None:
+    def __init__(
+        self,
+        input_dim,
+        encoder_emb_dim,
+        encoder_hid_dim,
+        encoder_fc_hid_dim,
+        encoder_dropout,
+        **kwargs,
+    ) -> None:
         super().__init__()
 
         # Embedding
@@ -79,8 +84,8 @@ class EncoderRNN(nn.Module):
             encoder_emb_dim,
             encoder_hid_dim,
             num_layers=num_layers,
-            bidirectional=bidirectional
-            ) # Input L x B x emb_dim -> Output L x B x rnn_hid_dim * 2 if bidirectional=True else 1
+            bidirectional=bidirectional,
+        )  # Input L x B x emb_dim -> Output L x B x rnn_hid_dim * 2 if bidirectional=True else 1
 
         # Fully Connection
         if bidirectional:
@@ -88,7 +93,7 @@ class EncoderRNN(nn.Module):
         else:
             self.num_hidden = 1 * num_layers
 
-        self.fc = nn.Linear(encoder_hid_dim*self.num_hidden, encoder_fc_hid_dim)
+        self.fc = nn.Linear(encoder_hid_dim * self.num_hidden, encoder_fc_hid_dim)
         self.dropout = nn.Dropout(encoder_dropout)
 
     def forward(self, x):
@@ -100,7 +105,7 @@ class EncoderRNN(nn.Module):
             outputs: L x B x (Encoder_Hidden_RNN * 2 if bidirectional = True else 1)
 
             hidden: B X Decoder_Hidden_RNN
-        
+
         """
         # Forward embedding -> L X B X emb_dim
         embedded = self.embedding(x)
@@ -114,9 +119,7 @@ class EncoderRNN(nn.Module):
         # Forward Fully Connected
         place_final_hidden_state = []
         for i in range(self.num_hidden):
-            place_final_hidden_state.append(
-                hidden[i, :, :]
-            )
+            place_final_hidden_state.append(hidden[i, :, :])
         hidden = torch.cat(place_final_hidden_state, dim=-1)
         hidden = self.fc(hidden)
         hidden = torch.tanh(hidden)
@@ -125,14 +128,16 @@ class EncoderRNN(nn.Module):
 
 
 class DecoderRNN(nn.Module):
-    def __init__(self,
-                output_dim,
-                decoder_emb_dim,
-                encoder_hid_dim,
-                decoder_hid_dim,
-                decoder_dropout,
-                attention=None,
-                **kwargs):
+    def __init__(
+        self,
+        output_dim,
+        decoder_emb_dim,
+        encoder_hid_dim,
+        decoder_hid_dim,
+        decoder_dropout,
+        attention=None,
+        **kwargs,
+    ):
         super().__init__()
 
         self.output_dim = output_dim
@@ -149,18 +154,20 @@ class DecoderRNN(nn.Module):
             input_dim_fc = decoder_hid_dim
         else:
 
-            input_dim_rnn = decoder_emb_dim + (encoder_hid_dim * 2 if encoder_bidirectional else 1)
-            input_dim_fc = decoder_hid_dim + decoder_emb_dim + (encoder_hid_dim * 2 if encoder_bidirectional else 1)
-        # Config RNN
-        self.rnn = nn.GRU(
-            input_dim_rnn,
-            decoder_hid_dim
+            input_dim_rnn = decoder_emb_dim + (
+                encoder_hid_dim * 2 if encoder_bidirectional else 1
             )
+            input_dim_fc = (
+                decoder_hid_dim
+                + decoder_emb_dim
+                + (encoder_hid_dim * 2 if encoder_bidirectional else 1)
+            )
+        # Config RNN
+        self.rnn = nn.GRU(input_dim_rnn, decoder_hid_dim)
 
         # Fully Connection
         self.fc = nn.Linear(input_dim_fc, output_dim)
         self.dropout = nn.Dropout(decoder_dropout)
-        
 
     def forward(self, input, decoder_hidden, encoder_outputs):
         """
@@ -169,10 +176,10 @@ class DecoderRNN(nn.Module):
         encoder_outputs: Length x Batch x (Encoder_hidden_dim * 2 if bidirectional = True else 1)
         """
 
-        input = input.unsqueeze(0) # 1 x Batch
+        input = input.unsqueeze(0)  # 1 x Batch
 
-        embedded = self.embedding(input) # 1 x Batch x Decoder_hidden_dim
-        embedded = self.dropout(embedded) # 1 x Batch x Decoder_hidden_dim
+        embedded = self.embedding(input)  # 1 x Batch x Decoder_hidden_dim
+        embedded = self.dropout(embedded)  # 1 x Batch x Decoder_hidden_dim
 
         # Attention
         if self.attention:
@@ -187,12 +194,11 @@ class DecoderRNN(nn.Module):
             weighted = weighted.permute(1, 0, 2)
 
             rnn_input = torch.cat((embedded, weighted), dim=2)
-        
+
         else:
             rnn_input = embedded
 
         output, decoder_hidden = self.rnn(rnn_input, decoder_hidden.unsqueeze(0))
-
 
         if self.attention:
             embedded = embedded.squeeze(0)

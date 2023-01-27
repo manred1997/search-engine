@@ -1,7 +1,10 @@
+import logging
 import os
 
 import numpy as np
 import torch
+
+logger = logging.getLogger(__name__)
 
 
 class EarlyStopping:
@@ -44,21 +47,30 @@ class EarlyStopping:
         """Saves model when validation loss decreases or accuracy/f1 increases."""
         if self.verbose:
             if args.tuning_metric == "loss":
-                print(f"Validation loss decreased ({self.val_loss_min:.6f} --> {val_loss:.6f}).  Saving model ...")
+                print(
+                    f"Validation loss decreased ({self.val_loss_min:.6f} --> {val_loss:.6f}).  Saving model ..."
+                )
             else:
                 print(
                     f"{args.tuning_metric} increased ({self.val_loss_min:.6f} --> {val_loss:.6f}).  Saving model ..."
                 )
-        model.save_pretrained(args.model_dir)
-        torch.save(args, os.path.join(args.model_dir, "training_args.bin"))
+        # model.save_pretrained(args.model_dir)
+        # torch.save(args, os.path.join(args.model_dir, "training_args.bin"))
         self.val_loss_min = val_loss
 
-        # # Save model checkpoint (Overwrite)
-        # if not os.path.exists(self.args.model_dir):
-        #     os.makedirs(self.args.model_dir)
-        # model_to_save = self.model.module if hasattr(self.model, 'module') else self.model
-        # model_to_save.save_pretrained(self.args.model_dir)
+        # Save model checkpoint (Overwrite)
+        if not os.path.exists(args.model_dir):
+            os.makedirs(args.model_dir)
+        model_to_save = model.module if hasattr(model, "module") else model
+
+        try:
+            model_to_save.save_pretrained(self.args.model_dir)
+        except Exception:
+            torch.save(
+                model_to_save.state_dict(),
+                os.path.join(args.model_dir, "model_weights.pth"),
+            )
 
         # # Save training arguments together with the trained model
-        # torch.save(self.args, os.path.join(self.args.model_dir, 'training_args.bin'))
-        # logger.info("Saving model checkpoint to %s", self.args.model_dir)
+        torch.save(args, os.path.join(args.model_dir, "training_args.bin"))
+        logger.info("Saving model checkpoint to %s", args.model_dir)

@@ -1,38 +1,29 @@
-import os
 import logging
-from tqdm.auto import tqdm, trange
-from typing import Union
+import os
 
 import torch
-import torch.nn.functional as F
-from torch.utils.tensorboard import SummaryWriter
-from torch.utils.data import DataLoader, RandomSampler, SequentialSampler
-from transformers import AdamW, get_linear_schedule_with_warmup
-
-from src.utils.utils import MODEL_CLASSES
-from src.utils.utils import get_evals_base_on_ids
-from src.utils.utils import merge_subtokens
-from src.utils.metrics import (
-    get_evals,
-    get_total_words,
-    get_word_accuracy,
-    get_word_correction_rate
-)
 from src.end_to_end.early_stopping import EarlyStopping
-from src.end_to_end.trainer.trainer import Trainer
-
 from src.end_to_end.model.loss import LabelSmoothingLoss
+from src.end_to_end.trainer.trainer import Trainer
+from src.utils.utils import MODEL_CLASSES, merge_subtokens
+from torch.utils.data import DataLoader, RandomSampler, SequentialSampler
+from torch.utils.tensorboard import SummaryWriter
+from tqdm.auto import tqdm, trange
+from transformers import AdamW, get_linear_schedule_with_warmup
 
 logger = logging.getLogger(__name__)
 
+
 class RNNTrainer(Trainer):
-    def __init__(self,
-                args,
-                tokenizer=None,
-                train_dataset=None,
-                dev_dataset=None,
-                test_dataset=None):
-                
+    def __init__(
+        self,
+        args,
+        tokenizer=None,
+        train_dataset=None,
+        dev_dataset=None,
+        test_dataset=None,
+    ):
+
         self.args = args
         self.tokenizer = tokenizer
         self.train_dataset = train_dataset
@@ -55,7 +46,7 @@ class RNNTrainer(Trainer):
                 decoder_dropout=args.decoder_dropout,
                 attention=args.use_attention,
                 encoder_num_layers=args.encoder_num_layers,
-                encoder_bidirectional=args.encoder_bidirectional
+                encoder_bidirectional=args.encoder_bidirectional,
             )
             self.model.load_state_dict(torch.load(args.pretrained_path))
         else:
@@ -70,52 +61,75 @@ class RNNTrainer(Trainer):
                 decoder_dropout=args.decoder_dropout,
                 attention=args.use_attention,
                 encoder_num_layers=args.encoder_num_layers,
-                encoder_bidirectional=args.encoder_bidirectional
+                encoder_bidirectional=args.encoder_bidirectional,
             )
         print(self.model)
         # GPU or CPU or MPS
         # torch.cuda.set_device(self.args.gpu_id)
         # logger.info('GPU ID :',self.args.gpu_id)
-        logger.info(f'Target device is: {args.device}')
+        logger.info(f"Target device is: {args.device}")
         self.device = args.device
 
         self.model.to(self.device)
-        model_parameters =  sum(p.numel() for p in self.model.parameters() if p.requires_grad)  
-        logger.info('No.Params of model:',model_parameters)
+        model_parameters = sum(
+            p.numel() for p in self.model.parameters() if p.requires_grad
+        )
+        logger.info(f"No.Params of model: {str(model_parameters)}", )
 
     def train(self):
         train_sampler = RandomSampler(self.train_dataset)
-        train_dataloader = DataLoader(self.train_dataset, sampler=train_sampler, batch_size=self.args.train_batch_size)
+        train_dataloader = DataLoader(
+            self.train_dataset,
+            sampler=train_sampler,
+            batch_size=self.args.train_batch_size,
+        )
 
         writer = SummaryWriter(log_dir=self.args.model_dir)
 
         if self.args.max_steps > 0:
             t_total = self.args.max_steps
             self.args.num_train_epochs = (
-                self.args.max_steps // (len(train_dataloader) // self.args.gradient_accumulation_steps) + 1
+                self.args.max_steps
+                // (len(train_dataloader) // self.args.gradient_accumulation_steps)
+                + 1
             )
         else:
-            t_total = len(train_dataloader) // self.args.gradient_accumulation_steps * self.args.num_train_epochs
+            t_total = (
+                len(train_dataloader)
+                // self.args.gradient_accumulation_steps
+                * self.args.num_train_epochs
+            )
 
         # Prepare optimizer and schedule (linear warmup and decay)
-        no_decay = ['bias', 'LayerNorm.bias', 'LayerNorm.weight']
+        no_decay = ["bias", "LayerNorm.bias", "LayerNorm.weight"]
         optimizer_grouped_parameters = [
             {
-                "params": [p for n, p in self.model.named_parameters() if not any(nd in n for nd in no_decay)],
+                "params": [
+                    p
+                    for n, p in self.model.named_parameters()
+                    if not any(nd in n for nd in no_decay)
+                ],
                 "weight_decay": self.args.weight_decay,
             },
             {
-                "params": [p for n, p in self.model.named_parameters() if any(nd in n for nd in no_decay)],
+                "params": [
+                    p
+                    for n, p in self.model.named_parameters()
+                    if any(nd in n for nd in no_decay)
+                ],
                 "weight_decay": 0.0,
             },
         ]
         optimizer = AdamW(
             optimizer_grouped_parameters,
-                lr=self.args.learning_rate,
-                eps=self.args.adam_epsilon)
+            lr=self.args.learning_rate,
+            eps=self.args.adam_epsilon,
+        )
 
         scheduler = get_linear_schedule_with_warmup(
-            optimizer, num_warmup_steps=self.args.warmup_steps, num_training_steps=t_total
+            optimizer,
+            num_warmup_steps=self.args.warmup_steps,
+            num_training_steps=t_total,
         )
 
         # Train!
@@ -123,7 +137,9 @@ class RNNTrainer(Trainer):
         logger.info("  Num examples = %d", len(self.train_dataset))
         logger.info("  Num Epochs = %d", self.args.num_train_epochs)
         logger.info("  Total train batch size = %d", self.args.train_batch_size)
-        logger.info("  Gradient Accumulation steps = %d", self.args.gradient_accumulation_steps)
+        logger.info(
+            "  Gradient Accumulation steps = %d", self.args.gradient_accumulation_steps
+        )
         logger.info("  Total optimization steps = %d", t_total)
         logger.info("  Logging steps = %d", self.args.logging_steps)
         logger.info("  Save steps = %d", self.args.save_steps)
@@ -136,7 +152,9 @@ class RNNTrainer(Trainer):
         early_stopping = EarlyStopping(patience=self.args.early_stopping, verbose=True)
 
         for _ in train_iterator:
-            epoch_iterator = tqdm(train_dataloader, desc="Iteration", position=0, leave=True)
+            epoch_iterator = tqdm(
+                train_dataloader, desc="Iteration", position=0, leave=True
+            )
             logger.info("Epoch", _)
 
             for step, batch in enumerate(epoch_iterator):
@@ -145,14 +163,20 @@ class RNNTrainer(Trainer):
 
                 inputs = {
                     "src": batch[0].to(self.device),
-                    "trg": batch[3].to(self.device)
+                    "trg": batch[3].to(self.device),
                 }
-                outputs = self.model(**inputs) # B x L x Vocab_size
+                outputs = self.model(**inputs)  # B x L x Vocab_size
 
-                outputs = outputs.to(self.device).view(-1, outputs.size(2))  # flatten(0, 1)
+                outputs = outputs.to(self.device).view(
+                    -1, outputs.size(2)
+                )  # flatten(0, 1)
                 targets = batch[3].to(self.device).transpose(0, 1).reshape(-1)
-                
-                loss_fct = LabelSmoothingLoss(self.args.vocab_size, padding_idx=self.tokenizer.pad_id, smoothing=self.args.smoothing_cof)
+
+                loss_fct = LabelSmoothingLoss(
+                    self.args.vocab_size,
+                    padding_idx=self.tokenizer.pad_id,
+                    smoothing=self.args.smoothing_cof,
+                )
                 loss_fct.to(self.device)
                 loss = loss_fct(outputs, targets)
 
@@ -163,19 +187,26 @@ class RNNTrainer(Trainer):
 
                 tr_loss += loss.item()
                 if (step + 1) % self.args.gradient_accumulation_steps == 0:
-                    torch.nn.utils.clip_grad_norm_(self.model.parameters(), self.args.max_grad_norm)
+                    torch.nn.utils.clip_grad_norm_(
+                        self.model.parameters(), self.args.max_grad_norm
+                    )
 
                     optimizer.step()
                     scheduler.step()  # Update learning rate schedule
                     self.model.zero_grad()
                     global_step += 1
 
-                    if self.args.logging_steps > 0 and global_step % self.args.logging_steps == 0:
+                    if (
+                        self.args.logging_steps > 0
+                        and global_step % self.args.logging_steps == 0
+                    ):
                         print("\nTuning metrics:", self.args.tuning_metric)
                         results = self.evaluate("dev")
                         for metric, value in results.items():
                             writer.add_scalar(f"{metric}", value, _)
-                        early_stopping(results[self.args.tuning_metric], self.model, self.args)
+                        early_stopping(
+                            results[self.args.tuning_metric], self.model, self.args
+                        )
                         if early_stopping.early_stop:
                             print("Early stopping")
                             break
@@ -213,7 +244,9 @@ class RNNTrainer(Trainer):
             raise Exception("Only dev and test dataset available")
 
         eval_sampler = SequentialSampler(dataset)
-        eval_dataloader = DataLoader(dataset, sampler=eval_sampler, batch_size=self.args.eval_batch_size)
+        eval_dataloader = DataLoader(
+            dataset, sampler=eval_sampler, batch_size=self.args.eval_batch_size
+        )
 
         # Eval!
         logger.info("***** Running evaluation on %s dataset *****", mode)
@@ -223,8 +256,8 @@ class RNNTrainer(Trainer):
         eval_loss = 0.0
         nb_eval_steps = 0
 
-        eval_correct_subtokens = 0.0
-        eval_total_subtokens = 0.0
+        # eval_correct_subtokens = 0.0
+        # eval_total_subtokens = 0.0
 
         self.model.eval()
 
@@ -233,29 +266,36 @@ class RNNTrainer(Trainer):
             with torch.no_grad():
                 inputs = {
                     "src": batch[0].to(self.device),
-                    "trg": batch[3].to(self.device)
+                    "trg": batch[3].to(self.device),
+                    "teacher_forcing_ratio": 0,
                 }
-                outputs = self.model(**inputs) # B x L x Vocab_size
+                outputs = self.model(**inputs)  # B x L x Vocab_size
 
-                outputs = outputs.to(self.device).view(-1, outputs.size(2))  # flatten(0, 1)
+                outputs = outputs.to(self.device).view(
+                    -1, outputs.size(2)
+                )  # flatten(0, 1)
                 targets = batch[3].to(self.device).transpose(0, 1).reshape(-1)
-                
-                loss_fct = LabelSmoothingLoss(self.args.vocab_size, padding_idx=self.tokenizer.pad_id, smoothing=self.args.smoothing_cof)
+
+                loss_fct = LabelSmoothingLoss(
+                    self.args.vocab_size,
+                    padding_idx=self.tokenizer.pad_id,
+                    smoothing=self.args.smoothing_cof,
+                )
                 loss_fct.to(self.device)
 
                 loss = loss_fct(outputs, targets)
 
                 eval_loss += loss.item()
 
+                # encoder_outputs, encoder_hidden = self.model.forward_encoder(
+                #     batch[0].to(self.device)
+                # )
+
             nb_eval_steps += 1
 
         eval_loss = eval_loss / nb_eval_steps
 
-        results = {
-            "loss": eval_loss,
-            "subtokens_accuracy": eval_correct_subtokens/eval_total_subtokens
-        }
-
+        results = {"loss": eval_loss}
 
         logger.info("***** Eval results *****")
         for key in sorted(results.keys()):
@@ -270,8 +310,13 @@ class RNNTrainer(Trainer):
         # Save model checkpoint (Overwrite)
         if not os.path.exists(self.args.model_dir):
             os.makedirs(self.args.model_dir)
-        model_to_save = self.model.module if hasattr(self.model, "module") else self.model
-        model_to_save.save_pretrained(self.args.model_dir)
+        model_to_save = (
+            self.model.module if hasattr(self.model, "module") else self.model
+        )
+        torch.save(
+            model_to_save.state_dict(),
+            os.path.join(self.args.model_dir, "model_weights.pth"),
+        )
 
         # Save training arguments together with the trained model
         torch.save(self.args, os.path.join(self.args.model_dir, "training_args.bin"))
@@ -283,16 +328,14 @@ class RNNTrainer(Trainer):
             raise Exception("Model doesn't exists! Train first!")
 
         try:
-            self.model = self.model_class.from_pretrained(
-                self.args.model_dir,
-                config=self.config,
-                args=self.args
+            self.model.load_state_dict(
+                torch.load(os.path.join(self.args.model_dir, "model_weights.pth"))
             )
             self.model.to(self.device)
             logger.info("***** Model Loaded *****")
         except Exception:
             raise Exception("Some model files might be missing...")
-        
+
     def decode_ids_to_sentence(self, ids):
         tokens = self.tokenizer.convert_ids_to_tokens(ids)
         return merge_subtokens(tokens)
@@ -300,6 +343,6 @@ class RNNTrainer(Trainer):
     def decode_ids_to_sentence_batch(self, ids_batch, length_ids_batch):
         sentences = []
         for ids, length in zip(ids_batch, length_ids_batch):
-            ids = ids[1: length+1] # Remove [CLS], [SEP], [PAD] ids
+            ids = ids[1 : length + 1]  # Remove [CLS], [SEP], [PAD] ids
             sentences.append(self.decode_ids_to_sentence(ids))
         return sentences
