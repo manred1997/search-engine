@@ -74,6 +74,7 @@ def get_word_accuracy(
         corr2corr + corr2incorr + incorr2corr + incorr2incorr
     )
 
+
 def get_sentence_accuracy(preds: List[str], targets: List[str], is_lower=False):
     """
     This function evaluates the accuarcy of sentence in batch
@@ -85,7 +86,7 @@ def get_sentence_accuracy(preds: List[str], targets: List[str], is_lower=False):
         is_same_sentence = lambda sent_1, sent_2: sent_1.lower() == sent_2.lower()
     else:
         is_same_sentence = lambda sent_1, sent_2: sent_1 == sent_2
-    
+
     assert len(preds) == len(targets)
 
     correct = []
@@ -95,9 +96,12 @@ def get_sentence_accuracy(preds: List[str], targets: List[str], is_lower=False):
         else:
             correct.append(0)
 
-    return round(sum(correct)/len(correct), 4), correct
+    return round(sum(correct) / len(correct), 4), correct
 
-def get_character_error_rate(preds: List[str], targets: List[str], is_lower=False, no_space=False):
+
+def get_character_error_rate(
+    preds: List[str], targets: List[str], is_lower=False, no_space=False
+):
     """
     This function evaluates the edit distance error of sentence in batch
     :param preds List[str], targets List[str]
@@ -112,10 +116,8 @@ def get_character_error_rate(preds: List[str], targets: List[str], is_lower=Fals
             pred, target = pred.lower(), target.lower()
 
         if no_space:
-            pred, target = pred.replace(' ', ''), target.replace(' ', '')
+            pred, target = pred.replace(" ", ""), target.replace(" ", "")
 
-        cer.append(
-            min(len(target), Lev.distance(target, pred))/len(target)
-        )
+        cer.append(min(len(target), Lev.distance(target, pred)) / len(target))
 
-    return round(sum(cer)/len(cer), 4), cer
+    return round(sum(cer) / len(cer), 4), cer

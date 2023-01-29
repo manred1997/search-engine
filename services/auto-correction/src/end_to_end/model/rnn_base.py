@@ -81,14 +81,12 @@ class E2EChar2CharSpellCheckRNN(nn.Module):
         decoder_hidden: Batch x Decoder_hidden_dim
         encoder_outputs: Length x Bactch x (Encoder_hidden_dim * 2 if bidirectional = True else 1)
 
-        decoder_output: batch_size x 1 x vocab_size
+        decoder_output: batch_size x vocab_size
         """
-        decoder_input = trg[-1]
+        decoder_input = trg[-1, :]
 
         decoder_output, decoder_hidden = self.decoder(
             decoder_input, decoder_hidden, encoder_outputs
         )
-
-        decoder_output = decoder_output.unsqueeze(1)
 
         return decoder_output, (decoder_hidden, encoder_outputs)

@@ -222,6 +222,20 @@ class CharacterTokenizer(object):
     def _get_vocab_len(self):
         return len(self.char_to_id)
 
+    def convert_ids_to_sentence(self, ids):
+        start_indice = 1 if self.sos_id in ids else 0
+        end_indice = ids.index(self.eos_id) if self.eos_id in ids else None
+        ids = ids[start_indice:end_indice]
+        sentence = "".join([self.convert_id_to_char(id) for id in ids])
+        return sentence, ids
+
+    def convert_batch_ids_to_batch_sentence(self, batch_ids):
+        sentences = []
+        for ids in batch_ids:
+            sentence, _ = self.convert_ids_to_sentence(ids)
+            sentences.append(sentence)
+        return sentences
+
 
 class Seq2SeqTokenizer:
     @classmethod

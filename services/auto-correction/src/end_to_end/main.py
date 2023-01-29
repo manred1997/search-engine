@@ -15,6 +15,7 @@ from src.utils.utils import (
     set_seed,
 )
 
+
 def main(args):
 
     init_logger()

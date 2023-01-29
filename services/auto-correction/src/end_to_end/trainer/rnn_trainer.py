@@ -1,11 +1,13 @@
 import logging
 import os
 
+import numpy as np
 import torch
 from src.end_to_end.early_stopping import EarlyStopping
 from src.end_to_end.model.loss import LabelSmoothingLoss
 from src.end_to_end.trainer.trainer import Trainer
-from src.utils.utils import MODEL_CLASSES, merge_subtokens
+from src.utils.metrics import get_character_error_rate, get_sentence_accuracy
+from src.utils.utils import MODEL_CLASSES
 from torch.utils.data import DataLoader, RandomSampler, SequentialSampler
 from torch.utils.tensorboard import SummaryWriter
 from tqdm.auto import tqdm, trange
@@ -74,7 +76,9 @@ class RNNTrainer(Trainer):
         model_parameters = sum(
             p.numel() for p in self.model.parameters() if p.requires_grad
         )
-        logger.info(f"No.Params of model: {str(model_parameters)}", )
+        logger.info(
+            f"No.Params of model: {str(model_parameters)}",
+        )
 
     def train(self):
         train_sampler = RandomSampler(self.train_dataset)
@@ -254,10 +258,12 @@ class RNNTrainer(Trainer):
         logger.info("  Batch size = %d", self.args.eval_batch_size)
 
         eval_loss = 0.0
-        nb_eval_steps = 0
 
-        # eval_correct_subtokens = 0.0
-        # eval_total_subtokens = 0.0
+        eval_character_error_rate = []
+
+        eval_sentence_accuracy = []
+
+        nb_eval_steps = 0
 
         self.model.eval()
 
@@ -287,15 +293,43 @@ class RNNTrainer(Trainer):
 
                 eval_loss += loss.item()
 
-                # encoder_outputs, encoder_hidden = self.model.forward_encoder(
-                #     batch[0].to(self.device)
-                # )
+                #
+                pred_ids, _ = self.predict_batch(batch[0].to(self.device))
+                pred_sentences = self.tokenizer.convert_batch_ids_to_batch_sentence(
+                    pred_ids
+                )
+
+                label_sentences = batch[5]
+
+                eval_character_error_rate.extend(
+                    get_character_error_rate(
+                        preds=pred_sentences, targets=label_sentences
+                    )[1]
+                )
+
+                eval_sentence_accuracy.extend(
+                    get_sentence_accuracy(
+                        preds=pred_sentences, targets=label_sentences
+                    )[1]
+                )
 
             nb_eval_steps += 1
 
         eval_loss = eval_loss / nb_eval_steps
 
-        results = {"loss": eval_loss}
+        eval_character_error_rate = round(
+            sum(eval_character_error_rate) / len(eval_character_error_rate), 4
+        )
+
+        eval_sentence_accuracy = round(
+            sum(eval_sentence_accuracy) / len(eval_sentence_accuracy), 4
+        )
+
+        results = {
+            "loss": eval_loss,
+            "cer": eval_character_error_rate,
+            "sent_acc": eval_sentence_accuracy,
+        }
 
         logger.info("***** Eval results *****")
         for key in sorted(results.keys()):
@@ -336,13 +370,54 @@ class RNNTrainer(Trainer):
         except Exception:
             raise Exception("Some model files might be missing...")
 
-    def decode_ids_to_sentence(self, ids):
-        tokens = self.tokenizer.convert_ids_to_tokens(ids)
-        return merge_subtokens(tokens)
+    def predict_batch(self, src):
+        """
+        src: Batch x Length
 
-    def decode_ids_to_sentence_batch(self, ids_batch, length_ids_batch):
-        sentences = []
-        for ids, length in zip(ids_batch, length_ids_batch):
-            ids = ids[1 : length + 1]  # Remove [CLS], [SEP], [PAD] ids
-            sentences.append(self.decode_ids_to_sentence(ids))
-        return sentences
+        outputs: pred_ids: Batch x Length* , pred_props: Batch x Length*
+        """
+
+        batch_size = src.shape[0]
+        max_length = src.shape[1]
+
+        pred_ids = [[self.tokenizer.sos_id] * batch_size]
+        pred_props = [[1.0] * batch_size]
+
+        time_step = 0
+
+        self.model.eval()
+        with torch.no_grad():
+            encoder_outputs, encoder_hidden = self.model.forward_encoder(src)
+            decoder_hidden = encoder_hidden
+
+            while (
+                not all(np.any(np.asarray(pred_ids).T == self.tokenizer.eos_id, axis=1))
+                and time_step <= max_length + 10
+            ):
+                trg = torch.tensor(pred_ids).to(self.device)
+
+                decoder_output, (
+                    decoder_hidden,
+                    encoder_outputs,
+                ) = self.model.forward_decoder(trg, decoder_hidden, encoder_outputs)
+
+                decoder_output = decoder_output.softmax(dim=-1)
+
+                props, indices = torch.topk(decoder_output, k=1)
+
+                props = props.flatten().tolist()
+                indices = indices.flatten().tolist()
+
+                pred_props.append(props)
+                pred_ids.append(indices)
+
+                time_step += 1
+
+            pred_ids = np.asarray(pred_ids).T
+
+            pred_props = np.asarray(pred_props).T
+
+            # pred_props = np.multiply(pred_props, pred_ids > 3)
+            # pred_props = np.sum(pred_props, axis=-1) / (pred_props > 0).sum(-1)
+
+        return pred_ids, pred_props
