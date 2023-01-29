@@ -8,6 +8,7 @@ sys.path.append(AUTO_COMPLETE_PATH)
 from src.helpers.AOL import process
 from src.utils.utils import init_logger
 
+
 def main(args):
     init_logger()
     process(

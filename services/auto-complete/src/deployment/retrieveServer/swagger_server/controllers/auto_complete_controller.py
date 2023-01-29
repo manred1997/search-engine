@@ -11,9 +11,6 @@ from settings.config import settings
 from src.retrieval.prefixtrie import Trie
 from src.utils.utils import _read_text_file
 
-
-
-
 query_logs = _read_text_file(
     os.path.join(
         SEARCH_ENGINE_PATH, settings.default.retrieval.prefix.FOLDER_QUERY_LOGS
