@@ -1,10 +1,12 @@
 import logging
 from typing import List, Tuple
 
+import Levenshtein as Lev
+
 logger = logging.getLogger(__name__)
 
 
-def get_evals(
+def get_word_evals(
     preds: List[str], sources: List[str], targets: List[str], is_lower=False
 ) -> Tuple[int, ...]:
     """
@@ -71,3 +73,49 @@ def get_word_accuracy(
     return (corr2corr + incorr2corr) / (
         corr2corr + corr2incorr + incorr2corr + incorr2incorr
     )
+
+def get_sentence_accuracy(preds: List[str], targets: List[str], is_lower=False):
+    """
+    This function evaluates the accuarcy of sentence in batch
+    :param preds List[str], targets List[str]
+    :return
+        accuracy
+    """
+    if is_lower:
+        is_same_sentence = lambda sent_1, sent_2: sent_1.lower() == sent_2.lower()
+    else:
+        is_same_sentence = lambda sent_1, sent_2: sent_1 == sent_2
+    
+    assert len(preds) == len(targets)
+
+    correct = []
+    for pred, target in zip(preds, targets):
+        if is_same_sentence(pred, target):
+            correct.append(1)
+        else:
+            correct.append(0)
+
+    return round(sum(correct)/len(correct), 4), correct
+
+def get_character_error_rate(preds: List[str], targets: List[str], is_lower=False, no_space=False):
+    """
+    This function evaluates the edit distance error of sentence in batch
+    :param preds List[str], targets List[str]
+    :return
+        character error rate
+    """
+    assert len(preds) == len(targets)
+
+    cer = []
+    for pred, target in zip(preds, targets):
+        if is_lower:
+            pred, target = pred.lower(), target.lower()
+
+        if no_space:
+            pred, target = pred.replace(' ', ''), target.replace(' ', '')
+
+        cer.append(
+            min(len(target), Lev.distance(target, pred))/len(target)
+        )
+
+    return round(sum(cer)/len(cer), 4), cer
