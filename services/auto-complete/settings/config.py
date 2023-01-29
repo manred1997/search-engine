@@ -8,8 +8,8 @@ AUTO_COMPLETE_PATH = os.environ.get("AUTO_COMPLETE_PATH")
 settings = Dynaconf(
     envvar_prefix="DYNACONF",
     settings_files=[
-        os.path.join(AUTO_COMPLETE_PATH, "src/settings/settings.json"),
-        os.path.join(AUTO_COMPLETE_PATH, "src/settings/.secrets.json"),
+        os.path.join(AUTO_COMPLETE_PATH, "settings/settings.json"),
+        os.path.join(AUTO_COMPLETE_PATH, "settings/.secrets.json"),
     ],
 )
 

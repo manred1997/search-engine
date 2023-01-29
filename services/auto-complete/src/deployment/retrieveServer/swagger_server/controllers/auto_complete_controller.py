@@ -7,7 +7,7 @@ SEARCH_ENGINE_PATH = os.environ.get("SEARCH_ENGINE_PATH")
 sys.path.append(AUTO_COMPLETE_PATH)
 
 import connexion
-from src.retrieval.config import settings
+from settings.config import settings
 from src.retrieval.prefixtrie import Trie
 from src.utils.utils import _read_text_file
 
