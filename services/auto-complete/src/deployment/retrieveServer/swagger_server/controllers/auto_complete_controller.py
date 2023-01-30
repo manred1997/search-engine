@@ -32,9 +32,10 @@ def find_completions_by_charater(body):  # noqa: E501
     """
     if connexion.request.is_json:
         keystroke = connexion.request.get_json()
-        trie.printAutoSuggestions(keystroke)
+        candidate_startsWith_prefix = trie.query(keystroke)
+        candidate_startsWith_prefix = [c[0] for c in candidate_startsWith_prefix]
         # body = str.from_dict()  # noqa: E501
-    return "do some magic!"
+    return candidate_startsWith_prefix
 
 
 def health_check():  # noqa: E501
