@@ -16,6 +16,7 @@ class TrieNode:
         # keys are characters, values are nodes
         self.children = {}
 
+
 class Trie:
     """The trie object"""
 
@@ -25,11 +26,11 @@ class Trie:
         The root node does not store any character
         """
         self.root = TrieNode("")
-    
+
     def _insert(self, word):
         """Insert a word into the trie"""
         node = self.root
-        
+
         # Loop through each character in the word
         # Check if there is no child containing the character, create a new child for the current node
         for char in word:
@@ -41,7 +42,7 @@ class Trie:
                 new_node = TrieNode(char)
                 node.children[char] = new_node
                 node = new_node
-        
+
         # Mark the end of a word
         node.is_end = True
 
@@ -85,7 +86,7 @@ class Trie:
 
     def dfs(self, node, prefix):
         """Depth-first traversal of the trie
-        
+
         Args:
             - node: the node to start with
             - prefix: the current prefix, for tracing a
@@ -93,20 +94,20 @@ class Trie:
         """
         if node.is_end:
             self.output.append((prefix + node.char, node.counter))
-        
+
         for child in node.children.values():
             self.dfs(child, prefix + node.char)
-        
+
     def query(self, x):
         """Given an input (a prefix), retrieve all words stored in
-        the trie with that prefix, sort the words by the number of 
+        the trie with that prefix, sort the words by the number of
         times they have been inserted
         """
         # Use a variable within the class to keep all possible outputs
         # As there can be more than one word with such prefix
         self.output = []
         node = self.root
-        
+
         # Check if the prefix is in the trie
         for char in x:
             if char in node.children:
@@ -114,7 +115,7 @@ class Trie:
             else:
                 # cannot found the prefix, return empty list
                 return []
-        
+
         # Traverse the trie to get all candidates
         self.dfs(node, x[:-1])
 
